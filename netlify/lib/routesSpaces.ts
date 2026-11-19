@@ -35,7 +35,7 @@ export async function handleSpaceRoutes(
       slug,
       name,
       tagline: body.tagline?.trim() || `Tell us what you think about ${name} in 20 seconds.`,
-      brandColor: body.brandColor || '#4f46e5',
+      brandColor: body.brandColor || '#0d7480',
       theme: body.theme || 'paper',
       layout: body.layout || 'masonry',
       cardRadius: body.cardRadius || 'soft',

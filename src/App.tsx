@@ -95,7 +95,7 @@ export function App() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#FAF9F6] text-slate-900">
+    <div className="min-h-screen flex flex-col bg-[#f6f8f9] text-slate-900">
       <Navbar
         currentPath={path}
         user={user}
@@ -137,7 +137,7 @@ export function App() {
                 <button
                   type="button"
                   onClick={handleStartDemo}
-                  className="cursor-pointer rounded-2xl bg-indigo-600 py-3 text-sm font-bold text-white hover:bg-indigo-700"
+                  className="cursor-pointer rounded-2xl bg-teal-700 py-3 text-sm font-bold text-white hover:bg-teal-800"
                 >
                   Launch 1-Click Demo Studio
                 </button>

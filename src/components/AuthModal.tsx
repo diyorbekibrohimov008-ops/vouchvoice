@@ -53,11 +53,12 @@ export function AuthModal({ open, onClose, onAuthenticated }: AuthModalProps) {
 
   return (
     <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/50 p-4 backdrop-blur-sm">
-      <div className="relative w-full max-w-md rounded-3xl border border-slate-200 bg-white p-6 shadow-2xl">
+      <div className="relative max-h-[90vh] w-full max-w-md overflow-y-auto overscroll-contain rounded-3xl border border-slate-200 bg-white p-6 shadow-2xl">
         <button
           type="button"
           onClick={onClose}
-          className="absolute top-4 right-4 cursor-pointer rounded-full p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+          aria-label="Close authentication modal"
+          className="absolute top-4 right-4 cursor-pointer rounded-full p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/60"
         >
           <X className="h-5 w-5" />
         </button>
@@ -73,7 +74,7 @@ export function AuthModal({ open, onClose, onAuthenticated }: AuthModalProps) {
           type="button"
           onClick={handleDemo}
           disabled={loading}
-          className="mt-4 flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl border border-indigo-200 bg-indigo-50 px-4 py-3 text-sm font-bold text-indigo-700 transition hover:bg-indigo-100"
+          className="mt-4 flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl border border-teal-200 bg-teal-50 px-4 py-3 text-sm font-bold text-teal-800 transition hover:bg-teal-100"
         >
           <Sparkles className="h-4 w-4" />
           <span>1-Click Instant Demo Workspace (2 Brands)</span>
@@ -96,7 +97,7 @@ export function AuthModal({ open, onClose, onAuthenticated }: AuthModalProps) {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Alex Rivera"
-                  className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm outline-none focus:border-indigo-500"
+                  className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm focus:border-teal-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/40"
                 />
               </div>
               <div>
@@ -107,8 +108,8 @@ export function AuthModal({ open, onClose, onAuthenticated }: AuthModalProps) {
                   type="text"
                   value={firstBrandName}
                   onChange={(e) => setFirstBrandName(e.target.value)}
-                  placeholder="Acme AI"
-                  className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm outline-none focus:border-indigo-500"
+                  placeholder="SignalBoard"
+                  className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm focus:border-teal-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/40"
                 />
               </div>
             </>
@@ -121,8 +122,8 @@ export function AuthModal({ open, onClose, onAuthenticated }: AuthModalProps) {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="founder@acme.io"
-              className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm outline-none focus:border-indigo-500"
+              placeholder="founder@signalboard.io"
+              className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm focus:border-teal-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/40"
             />
           </div>
 
@@ -135,7 +136,7 @@ export function AuthModal({ open, onClose, onAuthenticated }: AuthModalProps) {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="At least 6 characters"
-              className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm outline-none focus:border-indigo-500"
+              className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm focus:border-teal-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/40"
             />
           </div>
 
@@ -161,7 +162,7 @@ export function AuthModal({ open, onClose, onAuthenticated }: AuthModalProps) {
               <button
                 type="button"
                 onClick={() => setMode('login')}
-                className="cursor-pointer font-bold text-indigo-600"
+                className="cursor-pointer font-bold text-teal-700 hover:underline"
               >
                 Sign in
               </button>
@@ -172,7 +173,7 @@ export function AuthModal({ open, onClose, onAuthenticated }: AuthModalProps) {
               <button
                 type="button"
                 onClick={() => setMode('register')}
-                className="cursor-pointer font-bold text-indigo-600"
+                className="cursor-pointer font-bold text-teal-700 hover:underline"
               >
                 Create workspace
               </button>

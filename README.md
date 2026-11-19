@@ -2,6 +2,10 @@
 
 Voice-prompted AI testimonials, customizable "Wall of Love" widgets, and two-way syndication — built as an anti-paywall, low-cost alternative to Senja and Testimonial.to.
 
+> [!WARNING]
+> **Project Status — Work in Progress (Not Fully Ready)**
+> This project is currently under active development and is **not fully ready for production**. Some parts, features, or workflow steps will fail or behave unexpectedly. We are actively working on fixing all remaining issues.
+
 ## Key Features
 
 - **20-Second Voice-Prompted AI Transcripts (`/collect/:slug`)**: Guided 3-prompt mobile-first voice recorder (`MediaRecorder` + live Web Audio waveform + Web Speech API) with built-in zero-key disfluency cleanup (or optional OpenAI Whisper + GPT-4o-mini BYOK) and 1-tap customer approval.

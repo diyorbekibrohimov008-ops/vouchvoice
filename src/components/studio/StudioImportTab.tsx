@@ -51,7 +51,7 @@ export function StudioImportTab({
         <button
           type="button"
           onClick={() => onImportTextChange(SAMPLE_SENJA_EXPORT)}
-          className="inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-indigo-200 bg-indigo-50 px-4 py-2 text-xs font-bold text-indigo-700 hover:bg-indigo-100"
+          className="inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-teal-200 bg-teal-50 px-4 py-2 text-xs font-bold text-teal-800 hover:bg-teal-100"
         >
           <Sparkles className="h-3.5 w-3.5" />
           <span>Load Sample Senja JSON</span>
@@ -62,8 +62,8 @@ export function StudioImportTab({
         rows={10}
         value={importText}
         onChange={(e) => onImportTextChange(e.target.value)}
-        placeholder='Paste JSON array, CSV with headers, or lines like: "Saved us 5 hours a week!" — Maya Chen, Founder @ Acme'
-        className="font-mono-code mt-4 w-full rounded-2xl border border-slate-200 bg-slate-50 p-4 text-xs leading-relaxed text-slate-800 outline-none focus:border-indigo-500"
+        placeholder='Paste JSON array, CSV with headers, or lines like: "Saved us 5 hours a week!" — Elena Vance, Founder @ Northstar'
+        className="font-mono-code mt-4 w-full rounded-2xl border border-slate-200 bg-slate-50 p-4 text-xs leading-relaxed text-slate-800 focus:border-teal-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/40"
       />
 
       <div className="mt-4 flex items-center justify-end gap-3">
@@ -71,7 +71,7 @@ export function StudioImportTab({
           type="button"
           disabled={importing || !importText.trim()}
           onClick={onImport}
-          className="inline-flex cursor-pointer items-center gap-2 rounded-2xl bg-indigo-600 px-6 py-3 text-sm font-bold text-white shadow-sm hover:bg-indigo-700 disabled:opacity-50"
+          className="inline-flex cursor-pointer items-center gap-2 rounded-2xl bg-teal-700 px-6 py-3 text-sm font-bold text-white shadow-sm hover:bg-teal-800 disabled:opacity-50"
         >
           <Upload className="h-4 w-4" />
           <span>{importing ? 'Importing & cleaning…' : `Import into ${spaceName}`}</span>

@@ -42,7 +42,7 @@ export function StudioWallTab({
     <div className="mt-6 grid gap-6 lg:grid-cols-12">
       <div className="space-y-4 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm lg:col-span-4">
         <h3 className="flex items-center gap-2 text-base font-extrabold text-slate-900">
-          <LayoutGrid className="h-4 w-4 text-indigo-600" />
+          <LayoutGrid className="h-4 w-4 text-teal-700" />
           <span>Widget Design</span>
         </h3>
 
@@ -56,7 +56,7 @@ export function StudioWallTab({
                 onClick={() => onPatchSpace({ layout: l })}
                 className={`cursor-pointer rounded-xl border px-3 py-2 text-xs font-bold capitalize ${
                   space.layout === l
-                    ? 'border-indigo-600 bg-indigo-50 text-indigo-700'
+                    ? 'border-teal-600 bg-teal-50 text-teal-800'
                     : 'border-slate-200 text-slate-600 hover:bg-slate-50'
                 }`}
               >
@@ -76,11 +76,11 @@ export function StudioWallTab({
                 onClick={() => onPatchSpace({ theme: th })}
                 className={`cursor-pointer rounded-xl border px-3 py-2 text-xs font-bold capitalize ${
                   space.theme === th
-                    ? 'border-indigo-600 bg-indigo-50 text-indigo-700'
+                    ? 'border-teal-600 bg-teal-50 text-teal-800'
                     : 'border-slate-200 text-slate-600 hover:bg-slate-50'
                 }`}
               >
-                {th}
+                {th === 'indigo' ? 'oceanic' : th}
               </button>
             ))}
           </div>
@@ -129,7 +129,7 @@ export function StudioWallTab({
                 checked={Boolean(space[key])}
                 disabled={key === 'hidePoweredBy' && workspacePlan === 'free'}
                 onChange={(e) => onPatchSpace({ [key]: e.target.checked })}
-                className="h-4 w-4 accent-indigo-600"
+                className="h-4 w-4 accent-teal-700"
               />
             </label>
           ))}
@@ -138,7 +138,7 @@ export function StudioWallTab({
         <div className="border-t border-slate-100 pt-4">
           <div className="mb-2 flex items-center justify-between">
             <span className="flex items-center gap-1.5 text-xs font-extrabold text-slate-900">
-              <Code2 className="h-4 w-4 text-indigo-600" />
+              <Code2 className="h-4 w-4 text-teal-700" />
               <span>Embed Anywhere</span>
             </span>
             <div className="flex gap-1 text-[11px]">
@@ -165,7 +165,7 @@ export function StudioWallTab({
             <button
               type="button"
               onClick={() => onCopyText(activeSnippet, 'embed snippet')}
-              className="inline-flex w-full cursor-pointer items-center justify-center gap-1.5 rounded-xl bg-indigo-600 py-2 text-xs font-bold text-white hover:bg-indigo-700"
+              className="inline-flex w-full cursor-pointer items-center justify-center gap-1.5 rounded-xl bg-teal-700 py-2 text-xs font-bold text-white hover:bg-teal-800"
             >
               <Copy className="h-3.5 w-3.5" />
               <span>Copy Embed Code</span>

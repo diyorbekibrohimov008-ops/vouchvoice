@@ -43,7 +43,7 @@ export function StudioInboxTab({
               onClick={() => onStatusFilterChange(f)}
               className={`cursor-pointer rounded-full px-3.5 py-1.5 text-xs font-bold capitalize transition ${
                 statusFilter === f
-                  ? 'bg-indigo-600 text-white'
+                  ? 'bg-teal-700 text-white'
                   : 'border border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
               }`}
             >
@@ -83,7 +83,7 @@ export function StudioInboxTab({
                     <button
                       type="button"
                       onClick={() => onTogglePlay(t)}
-                      className="inline-flex cursor-pointer items-center gap-1 rounded-full bg-indigo-50 px-2.5 py-0.5 text-[11px] font-bold text-indigo-700 hover:bg-indigo-100"
+                      className="inline-flex cursor-pointer items-center gap-1 rounded-full bg-teal-50 px-2.5 py-0.5 text-[11px] font-bold text-teal-800 hover:bg-teal-100"
                     >
                       {playingId === t.id ? (
                         <Pause className="h-3 w-3" />
@@ -138,7 +138,7 @@ export function StudioInboxTab({
                 <button
                   type="button"
                   onClick={() => onSyndicateClick(t.id)}
-                  className="cursor-pointer rounded-xl border border-indigo-200 bg-indigo-50 px-3 py-1.5 text-xs font-bold text-indigo-700 hover:bg-indigo-100"
+                  className="cursor-pointer rounded-xl border border-teal-200 bg-teal-50 px-3 py-1.5 text-xs font-bold text-teal-800 hover:bg-teal-100"
                 >
                   Syndicate →
                 </button>

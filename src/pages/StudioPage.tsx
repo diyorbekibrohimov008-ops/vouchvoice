@@ -62,7 +62,7 @@ export function StudioPage({
   const [showNewSpace, setShowNewSpace] = useState(false);
   const [newSpaceName, setNewSpaceName] = useState('');
   const [newSpaceTagline, setNewSpaceTagline] = useState('');
-  const [newSpaceColor, setNewSpaceColor] = useState('#4f46e5');
+  const [newSpaceColor, setNewSpaceColor] = useState('#0d7480');
 
   const [showPlanModal, setShowPlanModal] = useState(false);
   const [customAiKey, setCustomAiKey] = useState('');
@@ -299,7 +299,7 @@ export function StudioPage({
               <select
                 value={activeSpace.slug}
                 onChange={(e) => setActiveSlug(e.target.value)}
-                className="cursor-pointer rounded-xl border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm font-extrabold text-slate-900 outline-none focus:border-indigo-500"
+                className="cursor-pointer rounded-xl border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm font-extrabold text-slate-900 focus:border-teal-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/40"
               >
                 {spaces.map((s) => (
                   <option key={s.slug} value={s.slug}>
@@ -311,7 +311,7 @@ export function StudioPage({
               <button
                 type="button"
                 onClick={() => setShowNewSpace(true)}
-                className="inline-flex cursor-pointer items-center gap-1 rounded-xl border border-indigo-200 bg-indigo-50 px-3 py-1.5 text-xs font-bold text-indigo-700 hover:bg-indigo-100"
+                className="inline-flex cursor-pointer items-center gap-1 rounded-xl border border-teal-200 bg-teal-50 px-3 py-1.5 text-xs font-bold text-teal-800 hover:bg-teal-100"
               >
                 <Plus className="h-3.5 w-3.5" />
                 <span>Add Brand Space</span>
@@ -326,7 +326,7 @@ export function StudioPage({
             onClick={() => copyText(`${origin}/collect/${activeSpace.slug}`, 'Voice Collector link')}
             className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50"
           >
-            <Copy className="h-3.5 w-3.5 text-indigo-600" />
+            <Copy className="h-3.5 w-3.5 text-teal-700" />
             <span>Copy Collector Link</span>
           </button>
 

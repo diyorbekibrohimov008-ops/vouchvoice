@@ -35,16 +35,17 @@ const THEME_CLASSES: Record<
     badge: 'bg-emerald-50 text-emerald-800 border-emerald-200',
   },
   indigo: {
-    shell: 'bg-gradient-to-br from-indigo-50 via-white to-violet-50 border-indigo-200',
-    card: 'bg-white/90 backdrop-blur border-indigo-100 shadow-sm',
-    text: 'text-indigo-950',
-    muted: 'text-indigo-600/80',
-    badge: 'bg-indigo-50 text-indigo-700 border-indigo-200',
+    shell: 'bg-gradient-to-br from-teal-50 via-white to-cyan-50 border-teal-200',
+    card: 'bg-white/95 backdrop-blur border-teal-100 shadow-sm',
+    text: 'text-slate-900',
+    muted: 'text-teal-700/80',
+    badge: 'bg-teal-50 text-teal-800 border-teal-200',
   },
 };
 
 export function WallPreview({ space, testimonials, onCollectClick }: WallPreviewProps) {
   const [playingId, setPlayingId] = useState<string | null>(null);
+  const [marqueePaused, setMarqueePaused] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const theme = THEME_CLASSES[space.theme] ?? THEME_CLASSES.paper;
 
@@ -115,7 +116,7 @@ export function WallPreview({ space, testimonials, onCollectClick }: WallPreview
             {space.showMetrics && item.outcomeMetric && (
               <span
                 className="rounded-full px-2.5 py-0.5 text-[11px] font-bold text-white"
-                style={{ backgroundColor: space.brandColor || '#4f46e5' }}
+                style={{ backgroundColor: space.brandColor || '#0d7480' }}
               >
                 {item.outcomeMetric}
               </span>
@@ -181,7 +182,17 @@ export function WallPreview({ space, testimonials, onCollectClick }: WallPreview
         </div>
       ) : space.layout === 'marquee' ? (
         <div className="overflow-hidden py-2">
-          <div className="vv-marquee-track">
+          <div className="mb-2 flex justify-end">
+            <button
+              type="button"
+              onClick={() => setMarqueePaused((p) => !p)}
+              aria-pressed={marqueePaused}
+              className="cursor-pointer rounded-full border border-slate-300 bg-white px-3 py-1 text-[11px] font-semibold text-slate-700 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/60"
+            >
+              {marqueePaused ? 'Resume stream' : 'Pause stream'}
+            </button>
+          </div>
+          <div className="vv-marquee-track" data-paused={marqueePaused ? 'true' : undefined}>
             {approved.map((t) => (
               <div key={t.id} className="w-80 shrink-0">
                 {renderCard(t, '-a')}

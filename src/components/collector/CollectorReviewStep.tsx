@@ -64,7 +64,7 @@ export function CollectorReviewStep({
         <button
           type="button"
           onClick={onBack}
-          className="cursor-pointer text-xs font-bold text-indigo-600 hover:underline"
+          className="cursor-pointer text-xs font-bold text-teal-700 hover:underline"
         >
           ← Back to voice
         </button>
@@ -101,7 +101,7 @@ export function CollectorReviewStep({
             type="text"
             value={pullQuote}
             onChange={(e) => onPullQuoteChange(e.target.value)}
-            className="w-full rounded-xl border border-slate-200 px-3.5 py-2 text-sm font-semibold text-slate-900 outline-none focus:border-indigo-500"
+            className="w-full rounded-xl border border-slate-200 px-3.5 py-2 text-sm font-semibold text-slate-900 focus:border-teal-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/40"
           />
         </div>
 
@@ -112,7 +112,7 @@ export function CollectorReviewStep({
             required
             value={editedText}
             onChange={(e) => onEditedTextChange(e.target.value)}
-            className="w-full rounded-xl border border-slate-200 p-3.5 text-sm leading-relaxed text-slate-800 outline-none focus:border-indigo-500"
+            className="w-full rounded-xl border border-slate-200 p-3.5 text-sm leading-relaxed text-slate-800 focus:border-teal-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/40"
           />
         </div>
 
@@ -123,6 +123,7 @@ export function CollectorReviewStep({
               <button
                 key={n}
                 type="button"
+                aria-label={`Rate ${n} stars`}
                 onClick={() => onRatingChange(n)}
                 className="cursor-pointer p-0.5"
               >
@@ -144,8 +145,8 @@ export function CollectorReviewStep({
               required
               value={authorName}
               onChange={(e) => onAuthorNameChange(e.target.value)}
-              placeholder="Sam Chen"
-              className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-indigo-500"
+              placeholder="Sam Patel"
+              className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:border-teal-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/40"
             />
           </div>
           <div>
@@ -155,7 +156,7 @@ export function CollectorReviewStep({
               value={authorRole}
               onChange={(e) => onAuthorRoleChange(e.target.value)}
               placeholder="Founder"
-              className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-indigo-500"
+              className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:border-teal-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/40"
             />
           </div>
           <div>
@@ -164,8 +165,8 @@ export function CollectorReviewStep({
               type="text"
               value={authorCompany}
               onChange={(e) => onAuthorCompanyChange(e.target.value)}
-              placeholder="Acme Co"
-              className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-indigo-500"
+              placeholder="Northstar Co"
+              className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:border-teal-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/40"
             />
           </div>
         </div>

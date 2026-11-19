@@ -57,7 +57,7 @@ export async function seedDemoWorkspace(forceReset = false): Promise<void> {
       slug: 'acme-ai',
       name: 'PulseDeck AI',
       tagline: 'Turn messy customer calls into crisp product roadmaps in 30 seconds.',
-      brandColor: '#4f46e5',
+      brandColor: '#0d7480',
       theme: 'paper',
       layout: 'masonry',
       cardRadius: 'soft',
@@ -133,7 +133,7 @@ export async function seedDemoWorkspace(forceReset = false): Promise<void> {
       authorName: 'Daniel Park',
       authorRole: 'Founder',
       authorCompany: 'LedgerLoop',
-      color: '#4f46e5',
+      color: '#0d7480',
       rating: 5,
       rawTranscript:
         'Um, so before PulseDeck AI, I was like spending literally 4 hours every Friday reading Zoom notes, you know? Honestly, once we switched, our team cut synthesis down to 12 minutes and shipped 3x more customer fixes.',
@@ -187,7 +187,7 @@ export async function seedDemoWorkspace(forceReset = false): Promise<void> {
       authorName: 'Hannah Brooks',
       authorRole: 'Growth Lead',
       authorCompany: 'KiteCRM',
-      color: '#7c3aed',
+      color: '#0e7490',
       rating: 5,
       rawTranscript:
         'PulseDeck turned 40 messy onboarding interviews into an actionable priority board before lunch. Every early-stage PM needs this.',

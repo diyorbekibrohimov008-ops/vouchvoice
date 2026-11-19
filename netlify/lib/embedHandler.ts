@@ -26,7 +26,7 @@ const WIDGET_SCRIPT = `(function(){
       return { bg: '#fbf7ef', card: '#fffdf8', border: '#eadfcd', text: '#1c1917', muted: '#78716c', pillBg: '#ecfdf5', pillText: '#047857' };
     }
     if (theme === 'indigo') {
-      return { bg: '#eef2ff', card: 'rgba(255,255,255,0.92)', border: '#c7d2fe', text: '#1e1b4b', muted: '#4338ca', pillBg: '#e0e7ff', pillText: '#3730a3' };
+      return { bg: '#f0fdfa', card: 'rgba(255,255,255,0.95)', border: '#99f6e4', text: '#0f172a', muted: '#0f766e', pillBg: '#ccfbf1', pillText: '#115e59' };
     }
     return { bg: 'transparent', card: '#ffffff', border: '#e2e8f0', text: '#0f172a', muted: '#64748b', pillBg: '#ecfdf5', pillText: '#047857' };
   }
@@ -51,7 +51,7 @@ const WIDGET_SCRIPT = `(function(){
         var theme = host.getAttribute('data-vouch-theme') || sp.theme || 'paper';
         var pal = themeVars(theme);
         var radius = sp.cardRadius === 'sharp' ? '6px' : sp.cardRadius === 'pill' ? '22px' : '16px';
-        var accent = sp.brandColor || '#4f46e5';
+        var accent = sp.brandColor || '#0d7480';
 
         var gridClass = layout === 'marquee' ? 'vv-marquee' : layout === 'spotlight' ? 'vv-spotlight' : layout === 'badge' ? 'vv-badge-wrap' : layout === 'grid' ? 'vv-grid' : 'vv-masonry';
 

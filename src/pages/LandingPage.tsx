@@ -41,18 +41,18 @@ export function LandingPage({ onNavigate, onStartDemo, onSelectPlan }: LandingPa
   return (
     <div>
       {/* Hero */}
-      <section className="relative overflow-hidden border-b border-slate-200/70 bg-gradient-to-b from-[#FAF9F6] via-white to-indigo-50/40">
+      <section className="relative overflow-hidden border-b border-slate-200/70 bg-gradient-to-b from-[#f6f8f9] via-white to-teal-50/40">
         <div className="mx-auto max-w-7xl px-4 pt-12 pb-16 sm:px-6 lg:pt-18 lg:pb-22">
           <div className="grid items-center gap-12 lg:grid-cols-12">
             <div className="lg:col-span-6">
-              <div className="inline-flex items-center gap-2 rounded-full border border-indigo-200 bg-indigo-50 px-3.5 py-1 text-xs font-bold text-indigo-700">
+              <div className="inline-flex items-center gap-2 rounded-full border border-teal-200 bg-teal-50 px-3.5 py-1 text-xs font-bold text-teal-800">
                 <Sparkles className="h-3.5 w-3.5" />
                 <span>Built to replace $29–$59/mo Senja & Testimonial.to plans</span>
               </div>
 
               <h1 className="mt-5 text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl lg:text-[54px] lg:leading-[1.06]">
                 Customers hate cameras.{' '}
-                <span className="font-serif-display font-normal italic text-indigo-600">
+                <span className="font-serif-display font-bold text-teal-700">
                   Let them leave a 20s voice note.
                 </span>
               </h1>
@@ -65,7 +65,7 @@ export function LandingPage({ onNavigate, onStartDemo, onSelectPlan }: LandingPa
                 <button
                   type="button"
                   onClick={onStartDemo}
-                  className="inline-flex cursor-pointer items-center gap-2 rounded-full bg-indigo-600 px-6 py-3.5 text-sm font-bold text-white shadow-lg shadow-indigo-600/20 transition hover:bg-indigo-700"
+                  className="inline-flex cursor-pointer items-center gap-2 rounded-full bg-teal-700 px-6 py-3.5 text-sm font-bold text-white shadow-lg shadow-teal-700/20 transition hover:bg-teal-800"
                 >
                   <Sparkles className="h-4 w-4" />
                   <span>Open Live Founder Studio</span>
@@ -127,7 +127,7 @@ export function LandingPage({ onNavigate, onStartDemo, onSelectPlan }: LandingPa
                     rows={3}
                     value={rawInput}
                     onChange={(e) => setRawInput(e.target.value)}
-                    className="w-full rounded-2xl border border-slate-200 bg-slate-50/70 p-3 text-xs leading-relaxed text-slate-700 outline-none focus:border-indigo-400"
+                    className="w-full rounded-2xl border border-slate-200 bg-slate-50/70 p-3 text-xs leading-relaxed text-slate-700 focus:border-teal-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/40"
                   />
                 </div>
 
@@ -147,7 +147,7 @@ export function LandingPage({ onNavigate, onStartDemo, onSelectPlan }: LandingPa
                     ))}
                   </div>
                   {analysis.outcomeMetric && (
-                    <span className="rounded-full bg-indigo-600 px-2.5 py-1 text-[11px] font-bold text-white">
+                    <span className="rounded-full bg-teal-700 px-2.5 py-1 text-[11px] font-bold text-white">
                       Detected ROI: {analysis.outcomeMetric}
                     </span>
                   )}
@@ -173,7 +173,7 @@ export function LandingPage({ onNavigate, onStartDemo, onSelectPlan }: LandingPa
                   <button
                     type="button"
                     onClick={() => onNavigate('/collect/acme-ai')}
-                    className="cursor-pointer font-bold text-indigo-600 hover:underline"
+                    className="cursor-pointer font-bold text-teal-700 hover:underline"
                   >
                     Record yours →
                   </button>
@@ -200,7 +200,7 @@ export function LandingPage({ onNavigate, onStartDemo, onSelectPlan }: LandingPa
           </div>
 
           <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-            <span className="grid h-10 w-10 place-items-center rounded-2xl bg-indigo-50 text-indigo-600">
+            <span className="grid h-10 w-10 place-items-center rounded-2xl bg-teal-50 text-teal-700">
               <Send className="h-5 w-5" />
             </span>
             <h3 className="mt-4 text-lg font-bold text-slate-900">
@@ -230,7 +230,7 @@ export function LandingPage({ onNavigate, onStartDemo, onSelectPlan }: LandingPa
         <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
           <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
             <div>
-              <span className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-indigo-600">
+              <span className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-teal-700">
                 <Globe className="h-3.5 w-3.5" />
                 Live Embeddable Wall of Love
               </span>

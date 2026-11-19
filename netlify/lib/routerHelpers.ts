@@ -9,10 +9,10 @@ export const PUBLIC_CORS: Record<string, string> = {
 };
 
 export const AVATAR_COLORS = [
-  '#4f46e5',
+  '#0d7480',
   '#0f766e',
   '#d97706',
-  '#7c3aed',
+  '#0e7490',
   '#0284c7',
   '#db2777',
   '#059669',
@@ -40,17 +40,24 @@ export function slugify(input: string): string {
 export function isSafeWebhookUrl(rawUrl: string): boolean {
   try {
     const parsed = new URL(rawUrl);
-    if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') return false;
-    const host = parsed.hostname.toLowerCase();
+    if (parsed.protocol !== 'https:') return false;
+    if (parsed.username || parsed.password) return false;
+    const host = parsed.hostname.toLowerCase().replace(/^\[|\]$/g, '');
     if (
       host === 'localhost' ||
       host === '0.0.0.0' ||
       host === '::1' ||
+      host.startsWith('fc') ||
+      host.startsWith('fd') ||
+      host.startsWith('fe80') ||
+      host.startsWith('::ffff:') ||
       host.endsWith('.local') ||
+      host.endsWith('.internal') ||
       /^127\./.test(host) ||
       /^10\./.test(host) ||
       /^192\.168\./.test(host) ||
       /^169\.254\./.test(host) ||
+      /^100\.(6[4-9]|[7-9]\d|1[01]\d|12[0-7])\./.test(host) ||
       /^172\.(1[6-9]|2\d|3[01])\./.test(host)
     ) {
       return false;

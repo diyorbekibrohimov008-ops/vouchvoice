@@ -84,9 +84,11 @@ export function buildSessionCookieHeader(token: string, req: Request, clear = fa
   return parts.join('; ');
 }
 
+const EPHEMERAL_FALLBACK_SECRET = randomBytes(32).toString('hex');
+
 const SESSION_SECRET =
   (typeof process !== 'undefined' && process.env?.SESSION_SECRET) ||
-  'vouchvoice-session-signing-secret-2026';
+  EPHEMERAL_FALLBACK_SECRET;
 
 function signSessionRecord(record: SessionRecord): string {
   const payload = Buffer.from(JSON.stringify(record), 'utf8').toString('base64url');

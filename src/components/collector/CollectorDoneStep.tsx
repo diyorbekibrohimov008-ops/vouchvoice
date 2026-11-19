@@ -51,7 +51,7 @@ export function CollectorDoneStep({
             {copiedTarget === 'google' ? (
               <Check className="h-4 w-4 text-emerald-600" />
             ) : (
-              <Copy className="h-4 w-4 text-indigo-600" />
+              <Copy className="h-4 w-4 text-teal-700" />
             )}
             <span>Copy & Post on Google Maps</span>
             <ExternalLink className="h-3.5 w-3.5 text-slate-400" />
@@ -79,7 +79,7 @@ export function CollectorDoneStep({
         <button
           type="button"
           onClick={() => onNavigate(`/wall/${slug}`)}
-          className="cursor-pointer text-indigo-600 hover:underline"
+          className="cursor-pointer text-teal-700 hover:underline"
         >
           See your review on the Wall of Love →
         </button>

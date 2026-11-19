@@ -30,7 +30,7 @@ export function NewSpaceModal({
     <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/50 p-4 backdrop-blur-sm">
       <form
         onSubmit={onSubmit}
-        className="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-6 shadow-2xl"
+        className="w-full max-w-md overscroll-contain rounded-3xl border border-slate-200 bg-white p-6 shadow-2xl"
       >
         <h3 className="text-lg font-extrabold text-slate-900">
           Add a Brand Space ($0 Extra)
@@ -47,7 +47,7 @@ export function NewSpaceModal({
               value={name}
               onChange={(e) => onNameChange(e.target.value)}
               placeholder="InvoiceBot"
-              className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm outline-none focus:border-indigo-500"
+              className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm focus:border-teal-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/40"
             />
           </div>
           <div>
@@ -57,7 +57,7 @@ export function NewSpaceModal({
               value={tagline}
               onChange={(e) => onTaglineChange(e.target.value)}
               placeholder="Share a 20-second voice note on how InvoiceBot helped you."
-              className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm outline-none focus:border-indigo-500"
+              className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm focus:border-teal-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/40"
             />
           </div>
           <div>
@@ -80,7 +80,7 @@ export function NewSpaceModal({
           </button>
           <button
             type="submit"
-            className="cursor-pointer rounded-xl bg-indigo-600 px-4 py-2 text-xs font-bold text-white hover:bg-indigo-700"
+            className="cursor-pointer rounded-xl bg-teal-700 px-4 py-2 text-xs font-bold text-white hover:bg-teal-800"
           >
             Create Brand Space
           </button>
@@ -113,7 +113,7 @@ export function PlanSettingsModal({
   if (!open) return null;
   return (
     <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/50 p-4 backdrop-blur-sm">
-      <div className="w-full max-w-lg rounded-3xl border border-slate-200 bg-white p-6 shadow-2xl">
+      <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto overscroll-contain rounded-3xl border border-slate-200 bg-white p-6 shadow-2xl">
         <h3 className="text-lg font-extrabold text-slate-900">
           Workspace Plan, Lifetime License & AI Engine
         </h3>
@@ -136,15 +136,15 @@ export function PlanSettingsModal({
               onClick={() => onSelectPlan(id)}
               className={`cursor-pointer rounded-2xl border p-3 text-left transition ${
                 workspace.plan === id
-                  ? 'border-indigo-600 bg-indigo-50'
+                  ? 'border-teal-600 bg-teal-50'
                   : 'border-slate-200 hover:bg-slate-50'
               }`}
             >
               <div className="flex items-center justify-between text-xs font-bold text-slate-900">
                 <span>{title}</span>
-                {workspace.plan === id && <Check className="h-4 w-4 text-indigo-600" />}
+                {workspace.plan === id && <Check className="h-4 w-4 text-teal-700" />}
               </div>
-              <div className="mt-1 text-base font-extrabold text-indigo-700">{price}</div>
+              <div className="mt-1 text-base font-extrabold text-teal-800">{price}</div>
             </button>
           ))}
         </div>
@@ -162,7 +162,7 @@ export function PlanSettingsModal({
               value={customAiKey}
               onChange={(e) => onCustomAiKeyChange(e.target.value)}
               placeholder={workspace.hasCustomAiKey ? 'Key saved (enter new to replace)' : 'sk-...'}
-              className="flex-1 rounded-xl border border-slate-200 px-3 py-2 text-xs outline-none focus:border-indigo-500"
+              className="flex-1 rounded-xl border border-slate-200 px-3 py-2 text-xs focus:border-teal-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/40"
             />
             <button
               type="button"

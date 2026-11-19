@@ -75,7 +75,7 @@ export async function handleAuthAndWorkspaceRoutes(
       slug,
       name: brandName,
       tagline: `Share a quick 20-second voice note about ${brandName}.`,
-      brandColor: '#4f46e5',
+      brandColor: '#0d7480',
       theme: 'paper',
       layout: 'masonry',
       cardRadius: 'soft',

@@ -87,7 +87,7 @@ export function PricingSection({ activePlan, onSelectPlan }: PricingSectionProps
               key={tier.id}
               className={`relative flex flex-col rounded-3xl border p-7 transition ${
                 tier.highlighted
-                  ? 'border-indigo-600 bg-slate-900 text-white shadow-xl shadow-indigo-950/15'
+                  ? 'border-teal-600 bg-slate-900 text-white shadow-xl shadow-teal-950/15'
                   : 'border-slate-200 bg-white text-slate-900 shadow-sm'
               }`}
             >
@@ -95,8 +95,8 @@ export function PricingSection({ activePlan, onSelectPlan }: PricingSectionProps
                 <span
                   className={`mb-4 inline-block w-fit rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-wider ${
                     tier.highlighted
-                      ? 'bg-indigo-500 text-white'
-                      : 'bg-indigo-50 text-indigo-700'
+                      ? 'bg-teal-600 text-white'
+                      : 'bg-teal-50 text-teal-800'
                   }`}
                 >
                   {tier.badge}
@@ -133,7 +133,7 @@ export function PricingSection({ activePlan, onSelectPlan }: PricingSectionProps
                   isCurrent
                     ? 'bg-emerald-500 text-white'
                     : tier.highlighted
-                    ? 'bg-white text-slate-900 hover:bg-indigo-50'
+                    ? 'bg-white text-slate-900 hover:bg-teal-50'
                     : 'bg-slate-900 text-white hover:bg-slate-800'
                 }`}
               >
@@ -156,7 +156,7 @@ export function PricingSection({ activePlan, onSelectPlan }: PricingSectionProps
             <thead>
               <tr className="border-b border-slate-200 text-xs uppercase tracking-wider text-slate-500">
                 <th className="px-6 py-3.5">Capability</th>
-                <th className="px-6 py-3.5 font-extrabold text-indigo-700">VouchVoice</th>
+                <th className="px-6 py-3.5 font-extrabold text-teal-800">VouchVoice</th>
                 <th className="px-6 py-3.5">Senja</th>
                 <th className="px-6 py-3.5">Testimonial.to</th>
               </tr>
@@ -188,7 +188,7 @@ export function PricingSection({ activePlan, onSelectPlan }: PricingSectionProps
               </tr>
               <tr>
                 <td className="px-6 py-3.5 font-semibold text-slate-800">Ongoing Cost</td>
-                <td className="px-6 py-3.5 font-extrabold text-indigo-700">$9/mo or $79 Lifetime</td>
+                <td className="px-6 py-3.5 font-extrabold text-teal-800">$9/mo or $79 Lifetime</td>
                 <td className="px-6 py-3.5 text-slate-600">$29–$59+/mo forever</td>
                 <td className="px-6 py-3.5 text-slate-600">$20–$50+/mo forever</td>
               </tr>

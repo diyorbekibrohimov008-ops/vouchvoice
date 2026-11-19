@@ -67,7 +67,7 @@ export function StudioSyndicateTab({
                 value={googleUrlInput}
                 onChange={(e) => onGoogleUrlChange(e.target.value)}
                 placeholder="https://g.page/r/your-place/review"
-                className="w-full rounded-xl border border-slate-200 px-3 py-2 text-xs outline-none focus:border-indigo-500"
+                className="w-full rounded-xl border border-slate-200 px-3 py-2 text-xs focus:border-teal-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/40"
               />
             </div>
             <div>
@@ -79,7 +79,7 @@ export function StudioSyndicateTab({
                 value={phSlugInput}
                 onChange={(e) => onPhSlugChange(e.target.value)}
                 placeholder="pulsedeck-ai"
-                className="w-full rounded-xl border border-slate-200 px-3 py-2 text-xs outline-none focus:border-indigo-500"
+                className="w-full rounded-xl border border-slate-200 px-3 py-2 text-xs focus:border-teal-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/40"
               />
             </div>
             <div>
@@ -91,7 +91,7 @@ export function StudioSyndicateTab({
                 value={webhookInput}
                 onChange={(e) => onWebhookChange(e.target.value)}
                 placeholder="https://hooks.zapier.com/hooks/catch/..."
-                className="w-full rounded-xl border border-slate-200 px-3 py-2 text-xs outline-none focus:border-indigo-500"
+                className="w-full rounded-xl border border-slate-200 px-3 py-2 text-xs focus:border-teal-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/40"
               />
             </div>
             <button
@@ -156,11 +156,12 @@ export function StudioSyndicateTab({
         {selectedTestimonial && drafts && (
           <div className="mt-4 space-y-4">
             <div className="overflow-hidden rounded-2xl border border-slate-200 bg-slate-50">
-              <div
-                className="w-full [&>svg]:h-auto [&>svg]:w-full"
-                dangerouslySetInnerHTML={{
-                  __html: buildQuoteCardSvg(selectedTestimonial, space),
-                }}
+              <img
+                src={`data:image/svg+xml;charset=utf-8,${encodeURIComponent(
+                  buildQuoteCardSvg(selectedTestimonial, space)
+                )}`}
+                alt={`Quote card graphic for ${selectedTestimonial.authorName}`}
+                className="block h-auto w-full"
               />
             </div>
 
@@ -231,7 +232,7 @@ export function StudioSyndicateTab({
                 <button
                   type="button"
                   onClick={() => onCopyText(drafts.linkedinPost, 'LinkedIn draft')}
-                  className="cursor-pointer text-indigo-600 hover:underline"
+                  className="cursor-pointer font-bold text-teal-700 hover:underline"
                 >
                   Copy text
                 </button>

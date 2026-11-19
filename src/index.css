@@ -2,15 +2,24 @@
 
 @layer base {
   body {
-    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-family: 'Funnel Sans', ui-sans-serif, system-ui, sans-serif;
   }
 
-  .font-serif-display {
-    font-family: 'Instrument Serif', Georgia, serif;
+  h1, h2, .font-serif-display {
+    font-family: 'Funnel Display', 'Funnel Sans', sans-serif;
   }
 
   .font-mono-code {
-    font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+    font-family: 'DM Mono', ui-monospace, SFMono-Regular, monospace;
+  }
+
+  :focus-visible {
+    outline: 2px solid #0d7480;
+    outline-offset: 2px;
+  }
+
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
   }
 }
 
@@ -30,6 +39,21 @@
   animation: vv-marquee-scroll 34s linear infinite;
 }
 
-.vv-marquee-track:hover {
+.vv-marquee-track:hover,
+.vv-marquee-track[data-paused='true'] {
   animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vv-marquee-track {
+    animation: none;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

@@ -28,8 +28,16 @@ const TAG_RULES: Array<{ tag: string; pattern: RegExp }> = [
 ];
 
 function countMatches(text: string, regex: RegExp): number {
-  const clone = new RegExp(regex.source, regex.flags.includes('g') ? regex.flags : `${regex.flags}g`);
-  return (text.match(clone) ?? []).length;
+  let count = 0;
+  regex.lastIndex = 0;
+  if (!regex.global) {
+    return regex.test(text) ? 1 : 0;
+  }
+  while (regex.exec(text) !== null) {
+    count += 1;
+  }
+  regex.lastIndex = 0;
+  return count;
 }
 
 function normalizePunctuation(input: string): string {
@@ -203,8 +211,20 @@ export function cleanTranscriptLocally(rawTranscript: string, brandName?: string
   working = working.replace(LEAD_IN_NOISE, '');
 
   if (brandName && brandName.trim().length > 2) {
-    const escaped = brandName.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    working = working.replace(new RegExp(`\\b${escaped}\\b`, 'gi'), brandName.trim());
+    const cleanBrand = brandName.trim();
+    const targetLower = cleanBrand.toLowerCase();
+    const lowerWorking = working.toLowerCase();
+    let idx = lowerWorking.indexOf(targetLower);
+    while (idx !== -1) {
+      const prevChar = idx > 0 ? working[idx - 1] : ' ';
+      const nextChar = idx + cleanBrand.length < working.length ? working[idx + cleanBrand.length] : ' ';
+      const isBoundaryBefore = !/[A-Za-z0-9_]/.test(prevChar);
+      const isBoundaryAfter = !/[A-Za-z0-9_]/.test(nextChar);
+      if (isBoundaryBefore && isBoundaryAfter) {
+        working = working.slice(0, idx) + cleanBrand + working.slice(idx + cleanBrand.length);
+      }
+      idx = lowerWorking.indexOf(targetLower, idx + cleanBrand.length);
+    }
   }
 
   const authentic = normalizePunctuation(working);

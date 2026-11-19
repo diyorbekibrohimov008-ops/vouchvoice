@@ -38,14 +38,14 @@ export function Navbar({
   };
 
   return (
-    <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-[#FAF9F6]/90 backdrop-blur-md">
+    <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-[#f6f8f9]/95 backdrop-blur-md">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
         <button
           type="button"
           onClick={() => onNavigate('/')}
           className="flex cursor-pointer items-center gap-2.5 text-left"
         >
-          <span className="grid h-9 w-9 place-items-center rounded-xl bg-indigo-600 text-white shadow-sm shadow-indigo-500/20">
+          <span className="grid h-9 w-9 place-items-center rounded-xl bg-teal-700 text-white shadow-sm shadow-teal-700/20">
             <Mic className="h-4.5 w-4.5" />
           </span>
           <div>
@@ -71,7 +71,7 @@ export function Navbar({
               <button
                 type="button"
                 onClick={() => onNavigate('/studio')}
-                className="inline-flex cursor-pointer items-center gap-1.5 rounded-full bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700"
+                className="inline-flex cursor-pointer items-center gap-1.5 rounded-full bg-teal-700 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-teal-800"
               >
                 <LayoutDashboard className="h-4 w-4" />
                 <span>Studio</span>

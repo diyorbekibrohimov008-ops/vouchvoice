@@ -57,8 +57,8 @@ export function CollectorRecordStep({
 }: CollectorRecordStepProps) {
   return (
     <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-lg shadow-slate-900/5 sm:p-7">
-      <div className="rounded-2xl border border-indigo-100 bg-indigo-50/70 p-4">
-        <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-indigo-700">
+      <div className="rounded-2xl border border-teal-100 bg-teal-50/70 p-4">
+        <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-teal-800">
           <span>Guided Prompt {activePromptIdx + 1} of 3</span>
           <div className="flex gap-1">
             {prompts.map((_, i) => (
@@ -67,7 +67,7 @@ export function CollectorRecordStep({
                 type="button"
                 onClick={() => onSelectPrompt(i)}
                 className={`cursor-pointer rounded-full px-2 py-0.5 text-[11px] ${
-                  activePromptIdx === i ? 'bg-indigo-600 text-white' : 'bg-white text-indigo-700'
+                  activePromptIdx === i ? 'bg-teal-700 text-white' : 'bg-white text-teal-800'
                 }`}
               >
                 Q{i + 1}
@@ -86,7 +86,7 @@ export function CollectorRecordStep({
           {levels.map((lv, idx) => (
             <div
               key={idx}
-              className="w-1.5 rounded-full transition-all duration-100"
+              className="w-1.5 rounded-full transition-[height,opacity] duration-100"
               style={{
                 height: `${Math.max(18, lv)}%`,
                 backgroundColor: recording ? '#e11d48' : brandColor,
@@ -122,7 +122,7 @@ export function CollectorRecordStep({
           <button
             type="button"
             onClick={onSampleVoice}
-            className="inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-indigo-200 bg-indigo-50 px-3.5 py-1.5 text-xs font-bold text-indigo-700 hover:bg-indigo-100"
+            className="inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-teal-200 bg-teal-50 px-3.5 py-1.5 text-xs font-bold text-teal-800 hover:bg-teal-100"
           >
             <Sparkles className="h-3.5 w-3.5" />
             <span>Try Sample 18s Voice Note</span>
@@ -164,7 +164,7 @@ export function CollectorRecordStep({
           value={rawTranscript}
           onChange={(e) => onChangeTranscript(e.target.value)}
           placeholder="As you speak, your raw words appear here (or type messy bullet points and let AI clean them into an authentic review)…"
-          className="w-full rounded-2xl border border-slate-200 bg-slate-50/60 p-3.5 text-sm leading-relaxed text-slate-800 outline-none focus:border-indigo-500"
+          className="w-full rounded-2xl border border-slate-200 bg-slate-50/60 p-3.5 text-sm leading-relaxed text-slate-800 focus:border-teal-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/40"
         />
       </div>
 
@@ -178,7 +178,7 @@ export function CollectorRecordStep({
         type="button"
         disabled={polishing}
         onClick={onPolish}
-        className="mt-5 flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl bg-indigo-600 py-3.5 text-sm font-bold text-white shadow-md transition hover:bg-indigo-700 disabled:opacity-60"
+        className="mt-5 flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl bg-teal-700 py-3.5 text-sm font-bold text-white shadow-md transition hover:bg-teal-800 disabled:opacity-60"
       >
         <Wand2 className="h-4 w-4" />
         <span>{polishing ? 'Polishing voice transcript…' : 'Clean Transcript & Preview Review'}</span>
