@@ -3,11 +3,11 @@
   "rewrites": [
     {
       "source": "/embed.js",
-      "destination": "/api/handler?__path=/embed.js"
+      "destination": "/api/vercel?__path=/embed.js"
     },
     {
       "source": "/api/(.*)",
-      "destination": "/api/handler?__path=/api/$1"
+      "destination": "/api/vercel?__path=/api/$1"
     },
     {
       "source": "/((?!api/|embed\\.js|assets/|favicon\\.svg).*)",
