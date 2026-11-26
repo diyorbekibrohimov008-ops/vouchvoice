@@ -30,14 +30,14 @@ describe('VouchVoice API integration', () => {
     };
     expect(data.user.email).toBe('demo@vouchvoice.app');
     expect(data.spaces.map((s) => s.slug)).toEqual(['acme-ai', 'pixelcraft-kit']);
-    expect(data.workspace.plan).toBe('lifetime_79');
+    expect(data.workspace.plan).toBe('free');
 
     const meRes = await handleApiRequest(makeReq('/api/auth/me', { headers: { cookie } }));
     const meJson = (await meRes.json()) as { user: { email: string } };
     expect(meJson.user.email).toBe('demo@vouchvoice.app');
   });
 
-  it('registers a new founder, creates a second brand space, and activates lifetime license', async () => {
+  it('registers a new founder, creates a second brand space, and unlocks branding removal for free', async () => {
     const regRes = await handleApiRequest(
       makeReq('/api/auth/register', {
         method: 'POST',
@@ -52,9 +52,13 @@ describe('VouchVoice API integration', () => {
     );
     expect(regRes.status).toBe(201);
     const cookie = cookieHeader(regRes);
-    const regBody = (await regRes.json()) as { spaces: Array<{ slug: string }>; workspace: { plan: string } };
+    const regBody = (await regRes.json()) as {
+      spaces: Array<{ slug: string }>;
+      workspace: { plan: string; licenseKey: string | null };
+    };
     expect(regBody.spaces[0].slug).toBe('focustimer');
     expect(regBody.workspace.plan).toBe('free');
+    expect(regBody.workspace.licenseKey).toBeNull();
 
     // Create second brand space at $0 extra
     const secondSpaceRes = await handleApiRequest(
@@ -66,19 +70,7 @@ describe('VouchVoice API integration', () => {
     );
     expect(secondSpaceRes.status).toBe(201);
 
-    // Upgrade to $79 lifetime license
-    const upgradeRes = await handleApiRequest(
-      makeReq('/api/workspace', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json', cookie },
-        body: JSON.stringify({ plan: 'lifetime_79' }),
-      })
-    );
-    const upBody = (await upgradeRes.json()) as { workspace: { plan: string; licenseKey: string } };
-    expect(upBody.workspace.plan).toBe('lifetime_79');
-    expect(upBody.workspace.licenseKey).toMatch(/^VV-LIFE-/);
-
-    // Allow hiding branding now that lifetime license is active
+    // Allow hiding branding immediately on the 100% free plan (no paywall or upgrade required)
     const patchSpace = await handleApiRequest(
       makeReq('/api/spaces/focustimer', {
         method: 'PATCH',
@@ -88,6 +80,22 @@ describe('VouchVoice API integration', () => {
     );
     const patched = (await patchSpace.json()) as { space: { hidePoweredBy: boolean } };
     expect(patched.space.hidePoweredBy).toBe(true);
+
+    // Workspace settings updates always stay on the unlocked free plan
+    const wsPatchRes = await handleApiRequest(
+      makeReq('/api/workspace', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', cookie },
+        body: JSON.stringify({ name: 'Jordan Review Studio', plan: 'lifetime_79' }),
+      })
+    );
+    expect(wsPatchRes.status).toBe(200);
+    const wsPatchBody = (await wsPatchRes.json()) as {
+      workspace: { name: string; plan: string; licenseKey: string | null };
+    };
+    expect(wsPatchBody.workspace.name).toBe('Jordan Review Studio');
+    expect(wsPatchBody.workspace.plan).toBe('free');
+    expect(wsPatchBody.workspace.licenseKey).toBeNull();
   });
 
   it('captures a 20s voice testimonial, stores audio, returns playable stream & syndication handoff', async () => {
@@ -149,7 +157,7 @@ describe('VouchVoice API integration', () => {
     const audioBytes = await audioRes.arrayBuffer();
     expect(audioBytes.byteLength).toBe(wav.byteLength);
 
-    // Verify lifetime standalone HTML export includes the newly approved review
+    // Verify standalone HTML export includes the newly approved review
     const exportRes = await handleApiRequest(makeReq('/api/public/walls/acme-ai/export'));
     expect(exportRes.status).toBe(200);
     const html = await exportRes.text();
@@ -215,5 +223,37 @@ describe('VouchVoice API integration', () => {
     };
     expect(synJson.drafts.linkedinPost).toContain('Devon Hart');
     expect(synJson.testimonial.syndicatedTargets).toContain('linkedin');
+  });
+
+  it('returns 400 instead of 500 on malformed JSON or invalid enum inputs', async () => {
+    const badJson = await handleApiRequest(
+      makeReq('/api/public/ai/polish', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: '{not-valid-json',
+      })
+    );
+    expect(badJson.status).toBe(400);
+
+    const demoRes = await handleApiRequest(makeReq('/api/auth/demo', { method: 'POST' }));
+    const cookie = cookieHeader(demoRes);
+
+    const badTarget = await handleApiRequest(
+      makeReq('/api/spaces/acme-ai/syndicate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', cookie },
+        body: JSON.stringify({ testimonialId: 't_voice_1', target: 'invalid_target' }),
+      })
+    );
+    expect(badTarget.status).toBe(400);
+
+    const badProvider = await handleApiRequest(
+      makeReq('/api/workspace', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', cookie },
+        body: JSON.stringify({ aiProvider: 'unknown_provider' }),
+      })
+    );
+    expect(badProvider.status).toBe(400);
   });
 });

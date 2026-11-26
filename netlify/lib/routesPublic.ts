@@ -13,6 +13,7 @@ import {
   isSafeWebhookUrl,
   json,
   listSpaceTestimonials,
+  parseJsonBody,
 } from './routerHelpers';
 import type {
   ReviewTone,
@@ -30,21 +31,23 @@ export async function handlePublicRoutes(
   method: string
 ): Promise<Response | null> {
   if (path === '/api/public/ai/polish' && method === 'POST') {
-    const body = (await req.json()) as {
+    const parsed = await parseJsonBody<{
       rawTranscript?: string;
       brandName?: string;
       spaceSlug?: string;
       audioBase64?: string;
       audioMimeType?: string;
-    };
+    }>(req, PUBLIC_CORS);
+    if (!parsed.ok) return parsed.errorResponse;
+    const body = parsed.data;
 
     const store = getStorage();
-    let brandName = body.brandName?.trim();
+    let brandName = typeof body.brandName === 'string' ? body.brandName.trim() : undefined;
     let customAiKey: string | null | undefined;
     let aiProvider: 'built_in' | 'openai' | 'gemini' = 'built_in';
 
-    if (body.spaceSlug) {
-      const sp = await store.getJSON<SpaceConfig>(DATA_STORE, `spaces/${body.spaceSlug}`);
+    if (typeof body.spaceSlug === 'string' && body.spaceSlug.trim()) {
+      const sp = await store.getJSON<SpaceConfig>(DATA_STORE, `spaces/${body.spaceSlug.trim()}`);
       if (sp) {
         brandName = brandName || sp.name;
         const ws = await store.getJSON<StoredWorkspaceRecord>(
@@ -56,14 +59,14 @@ export async function handlePublicRoutes(
       }
     }
 
-    let transcriptText = (body.rawTranscript ?? '').trim();
-    if (!transcriptText && body.audioBase64 && customAiKey) {
+    let transcriptText = typeof body.rawTranscript === 'string' ? body.rawTranscript.trim() : '';
+    if (!transcriptText && typeof body.audioBase64 === 'string' && customAiKey) {
       const bytes = decodeBase64Audio(body.audioBase64);
       if (bytes) {
         const buf = bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer;
         const whisperText = await transcribeAudioWithOpenAI(
           buf,
-          body.audioMimeType || 'audio/webm',
+          typeof body.audioMimeType === 'string' && body.audioMimeType ? body.audioMimeType : 'audio/webm',
           customAiKey
         );
         if (whisperText) transcriptText = whisperText;
@@ -135,7 +138,7 @@ export async function handlePublicRoutes(
     const space = await store.getJSON<SpaceConfig>(DATA_STORE, `spaces/${slug}`);
     if (!space) return json({ error: 'Space not found' }, 404, PUBLIC_CORS);
 
-    const body = (await req.json()) as {
+    const parsed = await parseJsonBody<{
       authorName?: string;
       authorRole?: string;
       authorCompany?: string;
@@ -151,12 +154,14 @@ export async function handlePublicRoutes(
       durationSec?: number | null;
       audioBase64?: string | null;
       audioMimeType?: string | null;
-    };
+    }>(req, PUBLIC_CORS);
+    if (!parsed.ok) return parsed.errorResponse;
+    const body = parsed.data;
 
-    const authorName = (body.authorName ?? '').trim();
-    const rawTranscript = (body.rawTranscript ?? '').trim();
+    const authorName = typeof body.authorName === 'string' ? body.authorName.trim() : '';
+    const rawTranscript = typeof body.rawTranscript === 'string' ? body.rawTranscript.trim() : '';
     const cleanedText =
-      (body.cleanedText ?? '').trim() ||
+      (typeof body.cleanedText === 'string' ? body.cleanedText.trim() : '') ||
       cleanTranscriptLocally(rawTranscript, space.name).cleanedByTone.authentic;
 
     if (!authorName || !cleanedText) {
@@ -166,13 +171,13 @@ export async function handlePublicRoutes(
     const id = `t_${randomUUID().slice(0, 10)}`;
     let hasAudio = false;
     let audioKey: string | null = null;
-    if (body.audioBase64) {
+    if (typeof body.audioBase64 === 'string' && body.audioBase64) {
       const bytes = decodeBase64Audio(body.audioBase64);
       if (bytes) {
         audioKey = `audio/${id}`;
         await store.setBinary(AUDIO_STORE, audioKey, bytes, {
-          contentType: body.audioMimeType || 'audio/webm',
-          durationSec: body.durationSec ?? 20,
+          contentType: typeof body.audioMimeType === 'string' && body.audioMimeType ? body.audioMimeType : 'audio/webm',
+          durationSec: typeof body.durationSec === 'number' && Number.isFinite(body.durationSec) ? body.durationSec : 20,
         });
         hasAudio = true;
       }
@@ -181,30 +186,49 @@ export async function handlePublicRoutes(
     const fallbackAnalysis = cleanTranscriptLocally(cleanedText, space.name);
     const nowIso = new Date().toISOString();
     const rating = Math.max(1, Math.min(5, Math.round(Number(body.rating ?? 5) || 5)));
+    const validTone: ReviewTone =
+      body.tone === 'authentic' || body.tone === 'crisp' || body.tone === 'results'
+        ? body.tone
+        : 'authentic';
 
     const testimonial: Testimonial = {
       id,
       spaceSlug: slug,
       authorName,
-      authorRole: (body.authorRole ?? '').trim() || 'Customer',
-      authorCompany: (body.authorCompany ?? '').trim(),
+      authorRole: (typeof body.authorRole === 'string' ? body.authorRole.trim() : '') || 'Customer',
+      authorCompany: typeof body.authorCompany === 'string' ? body.authorCompany.trim() : '',
       authorAvatarColor: AVATAR_COLORS[Math.floor(Math.random() * AVATAR_COLORS.length)],
       rating,
       rawTranscript: rawTranscript || cleanedText,
       cleanedText,
-      pullQuote: (body.pullQuote ?? '').trim() || fallbackAnalysis.pullQuote,
-      tone: body.tone || 'authentic',
+      pullQuote: (typeof body.pullQuote === 'string' ? body.pullQuote.trim() : '') || fallbackAnalysis.pullQuote,
+      tone: validTone,
       outcomeMetric:
-        body.outcomeMetric !== undefined ? body.outcomeMetric : fallbackAnalysis.outcomeMetric,
-      source: body.source || (hasAudio ? 'voice' : 'text'),
-      durationSec: body.durationSec ?? (hasAudio ? 20 : null),
+        body.outcomeMetric !== undefined
+          ? typeof body.outcomeMetric === 'string'
+            ? body.outcomeMetric.trim() || null
+            : null
+          : fallbackAnalysis.outcomeMetric,
+      source: hasAudio ? 'voice' : 'text',
+      durationSec:
+        typeof body.durationSec === 'number' && Number.isFinite(body.durationSec)
+          ? Math.max(1, Math.min(180, Math.round(body.durationSec)))
+          : hasAudio
+          ? 20
+          : null,
       hasAudio,
       audioKey,
       status: 'approved',
       featured: false,
       syndicatedTargets: [],
-      tags: body.tags?.length ? body.tags : fallbackAnalysis.tags,
-      fillersRemovedCount: body.fillersRemovedCount ?? 0,
+      tags:
+        Array.isArray(body.tags) && body.tags.every((t) => typeof t === 'string') && body.tags.length > 0
+          ? body.tags.slice(0, 8)
+          : fallbackAnalysis.tags,
+      fillersRemovedCount:
+        typeof body.fillersRemovedCount === 'number' && Number.isFinite(body.fillersRemovedCount)
+          ? Math.max(0, Math.round(body.fillersRemovedCount))
+          : 0,
       createdAt: nowIso,
       approvedAt: nowIso,
     };
@@ -276,7 +300,7 @@ export async function handlePublicRoutes(
       status: 200,
       headers: {
         'Content-Type': 'text/html; charset=utf-8',
-        'Content-Disposition': `attachment; filename="${slug}-wall-of-love-lifetime.html"`,
+        'Content-Disposition': `attachment; filename="${slug}-wall-of-love.html"`,
       },
     });
   }

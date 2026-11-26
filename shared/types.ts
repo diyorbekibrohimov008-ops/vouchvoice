@@ -1,4 +1,4 @@
-export type PlanTier = 'free' | 'maintenance_9' | 'lifetime_79';
+export type PlanTier = 'free';
 
 export type WallLayout = 'masonry' | 'grid' | 'marquee' | 'spotlight' | 'badge';
 

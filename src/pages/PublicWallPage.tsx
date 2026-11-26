@@ -14,24 +14,34 @@ export function PublicWallPage({ slug, embedMode = false, onNavigate }: PublicWa
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let active = true;
     setLoading(true);
     api
       .getPublicSpace(slug)
-      .then(setData)
-      .catch(() => setData(null))
-      .finally(() => setLoading(false));
+      .then((res) => {
+        if (active) setData(res);
+      })
+      .catch(() => {
+        if (active) setData(null);
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
   }, [slug]);
 
   if (loading) {
     return (
-      <div className="p-12 text-center text-sm text-slate-500">Loading Wall of Love…</div>
+      <div className="p-12 text-center text-sm text-[#576278]">Loading customer reviews…</div>
     );
   }
 
   if (!data) {
     return (
       <div className="p-12 text-center">
-        <h1 className="text-xl font-bold text-slate-900">Wall not found</h1>
+        <h1 className="font-display text-xl font-bold text-[#131722]">Review page not found</h1>
       </div>
     );
   }
@@ -49,29 +59,29 @@ export function PublicWallPage({ slug, embedMode = false, onNavigate }: PublicWa
   }
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
-      <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
+    <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+      <div className="mb-8 flex flex-wrap items-end justify-between gap-4 border-b border-[#E5E9F0] pb-6">
         <div>
-          <div className="inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-bold text-amber-800">
+          <div className="inline-flex items-center gap-2 text-xs font-semibold text-[#4B5568]">
             <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-500" />
-            <span>
-              {data.stats.averageRating}/5 average · {data.stats.totalApproved} verified reviews ({data.stats.voiceCount} voice notes)
+            <span className="tabular-nums">
+              {data.stats.averageRating}/5 average across {data.stats.totalApproved} verified reviews ({data.stats.voiceCount} voice notes)
             </span>
           </div>
-          <h1 className="mt-3 text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
-            {data.space.name} — Wall of Love
+          <h1 className="font-display mt-2 text-3xl font-extrabold tracking-[-0.025em] text-[#131722] sm:text-4xl">
+            {data.space.name} customer reviews
           </h1>
-          <p className="mt-1.5 text-sm text-slate-600">{data.space.tagline}</p>
+          <p className="mt-1.5 text-sm text-[#4B5568]">{data.space.tagline}</p>
         </div>
 
         <button
           type="button"
           onClick={() => onNavigate(`/collect/${slug}`)}
-          className="inline-flex cursor-pointer items-center gap-2 rounded-full px-5 py-3 text-sm font-bold text-white shadow-md transition hover:opacity-95"
-          style={{ backgroundColor: data.space.brandColor }}
+          className="inline-flex cursor-pointer items-center gap-2 rounded-xl px-5 py-3 text-sm font-bold text-white transition hover:opacity-95"
+          style={{ backgroundColor: data.space.brandColor || '#2142e7' }}
         >
           <Mic className="h-4 w-4" />
-          <span>Leave a 20s Voice Review</span>
+          <span>Leave a 20s voice review</span>
         </button>
       </div>
 

@@ -9,6 +9,7 @@ import {
   json,
   listSpaceTestimonials,
   listSyndicationEvents,
+  parseJsonBody,
   requireAuthSpace,
 } from './routerHelpers';
 import type {
@@ -53,35 +54,61 @@ export async function handleTestimonialRoutes(
     const existing = await store.getJSON<Testimonial>(DATA_STORE, key);
     if (!existing) return json({ error: 'Testimonial not found' }, 404);
 
-    const body = (await req.json()) as Partial<{
-      status: TestimonialStatus;
-      featured: boolean;
-      cleanedText: string;
-      pullQuote: string;
-      tone: ReviewTone;
-      outcomeMetric: string | null;
-      authorName: string;
-      authorRole: string;
-      authorCompany: string;
-      rating: number;
-    }>;
+    const parsed = await parseJsonBody<
+      Partial<{
+        status: TestimonialStatus;
+        featured: boolean;
+        cleanedText: string;
+        pullQuote: string;
+        tone: ReviewTone;
+        outcomeMetric: string | null;
+        authorName: string;
+        authorRole: string;
+        authorCompany: string;
+        rating: number;
+      }>
+    >(req);
+    if (!parsed.ok) return parsed.errorResponse;
+    const body = parsed.data;
+
+    if (
+      body.status !== undefined &&
+      body.status !== 'approved' &&
+      body.status !== 'pending' &&
+      body.status !== 'archived'
+    ) {
+      return json({ error: 'Invalid review status.' }, 400);
+    }
 
     const nextStatus = body.status ?? existing.status;
     const updated: Testimonial = {
       ...existing,
       status: nextStatus,
-      featured: body.featured ?? existing.featured,
-      cleanedText: body.cleanedText?.trim() || existing.cleanedText,
-      pullQuote: body.pullQuote !== undefined ? body.pullQuote.trim() : existing.pullQuote,
-      tone: body.tone ?? existing.tone,
+      featured: typeof body.featured === 'boolean' ? body.featured : existing.featured,
+      cleanedText:
+        typeof body.cleanedText === 'string' && body.cleanedText.trim()
+          ? body.cleanedText.trim()
+          : existing.cleanedText,
+      pullQuote: typeof body.pullQuote === 'string' ? body.pullQuote.trim() : existing.pullQuote,
+      tone:
+        body.tone === 'authentic' || body.tone === 'crisp' || body.tone === 'results'
+          ? body.tone
+          : existing.tone,
       outcomeMetric:
-        body.outcomeMetric !== undefined ? body.outcomeMetric : existing.outcomeMetric,
-      authorName: body.authorName?.trim() || existing.authorName,
-      authorRole: body.authorRole !== undefined ? body.authorRole.trim() : existing.authorRole,
+        body.outcomeMetric !== undefined
+          ? typeof body.outcomeMetric === 'string'
+            ? body.outcomeMetric.trim() || null
+            : null
+          : existing.outcomeMetric,
+      authorName:
+        typeof body.authorName === 'string' && body.authorName.trim()
+          ? body.authorName.trim()
+          : existing.authorName,
+      authorRole: typeof body.authorRole === 'string' ? body.authorRole.trim() : existing.authorRole,
       authorCompany:
-        body.authorCompany !== undefined ? body.authorCompany.trim() : existing.authorCompany,
+        typeof body.authorCompany === 'string' ? body.authorCompany.trim() : existing.authorCompany,
       rating:
-        body.rating !== undefined
+        typeof body.rating === 'number' && Number.isFinite(body.rating)
           ? Math.max(1, Math.min(5, Math.round(body.rating)))
           : existing.rating,
       approvedAt:
@@ -110,12 +137,14 @@ export async function handleTestimonialRoutes(
   if (importMatch && method === 'POST') {
     const auth = await requireAuthSpace(req, importMatch[1]);
     if ('errorResponse' in auth) return auth.errorResponse;
-    const body = (await req.json()) as {
+    const parsedBody = await parseJsonBody<{
       rawInput?: string;
       preferredSource?: TestimonialSource;
-    };
+    }>(req);
+    if (!parsedBody.ok) return parsedBody.errorResponse;
+    const body = parsedBody.data;
     const parsed = parseImportPayload(
-      body.rawInput ?? '',
+      typeof body.rawInput === 'string' ? body.rawInput : '',
       body.preferredSource,
       auth.space.name
     );
@@ -167,12 +196,26 @@ export async function handleTestimonialRoutes(
   if (syndicateMatch && method === 'POST') {
     const auth = await requireAuthSpace(req, syndicateMatch[1]);
     if ('errorResponse' in auth) return auth.errorResponse;
-    const body = (await req.json()) as {
+    const parsedBody = await parseJsonBody<{
       testimonialId?: string;
       target?: SyndicationTarget;
-    };
-    if (!body.testimonialId || !body.target) {
-      return json({ error: 'testimonialId and target are required' }, 400);
+    }>(req);
+    if (!parsedBody.ok) return parsedBody.errorResponse;
+    const body = parsedBody.data;
+    const validTargets = new Set<SyndicationTarget>([
+      'linkedin',
+      'google_maps',
+      'product_hunt',
+      'x',
+      'webhook',
+    ]);
+    if (
+      typeof body.testimonialId !== 'string' ||
+      !body.testimonialId.trim() ||
+      !body.target ||
+      !validTargets.has(body.target)
+    ) {
+      return json({ error: 'Valid testimonialId and target are required' }, 400);
     }
 
     const store = getStorage();

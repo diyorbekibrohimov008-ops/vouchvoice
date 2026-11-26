@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Mic, Pause, Play, Star } from 'lucide-react';
 import type { SpaceConfig } from '../../shared/types';
 import type { TestimonialWithAudio } from '../lib/api';
@@ -14,32 +14,32 @@ const THEME_CLASSES: Record<
   { shell: string; card: string; text: string; muted: string; badge: string }
 > = {
   paper: {
-    shell: 'bg-slate-50/80 border-slate-200',
-    card: 'bg-white border-slate-200/90 shadow-sm',
-    text: 'text-slate-900',
-    muted: 'text-slate-500',
-    badge: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+    shell: 'bg-[#EEF1F6] border-[#DCE2EC]',
+    card: 'bg-white border-[#DCE2EC]',
+    text: 'text-[#131722]',
+    muted: 'text-[#576278]',
+    badge: 'bg-[#131722] text-white border-[#131722]',
   },
   midnight: {
-    shell: 'bg-slate-950 border-slate-800',
-    card: 'bg-slate-900 border-slate-800 shadow-lg shadow-black/30',
-    text: 'text-slate-50',
-    muted: 'text-slate-400',
-    badge: 'bg-emerald-950/80 text-emerald-300 border-emerald-800',
+    shell: 'bg-[#0F131D] border-[#232B3D]',
+    card: 'bg-[#171D2B] border-[#263046]',
+    text: 'text-[#F4F6F8]',
+    muted: 'text-[#9AA6BE]',
+    badge: 'bg-[#E63B2E] text-white border-[#E63B2E]',
   },
   cream: {
-    shell: 'bg-[#FBF7EF] border-[#EAE0CE]',
-    card: 'bg-[#FFFDF8] border-[#E7DAC5] shadow-sm',
-    text: 'text-stone-900',
-    muted: 'text-stone-500',
-    badge: 'bg-emerald-50 text-emerald-800 border-emerald-200',
+    shell: 'bg-[#F8F4EC] border-[#E6DEC9]',
+    card: 'bg-[#FFFDF9] border-[#E4D9C4]',
+    text: 'text-[#1D1B18]',
+    muted: 'text-[#635C52]',
+    badge: 'bg-[#1D1B18] text-white border-[#1D1B18]',
   },
   indigo: {
-    shell: 'bg-gradient-to-br from-teal-50 via-white to-cyan-50 border-teal-200',
-    card: 'bg-white/95 backdrop-blur border-teal-100 shadow-sm',
-    text: 'text-slate-900',
-    muted: 'text-teal-700/80',
-    badge: 'bg-teal-50 text-teal-800 border-teal-200',
+    shell: 'bg-[#EBF0FF] border-[#C9D6FF]',
+    card: 'bg-white border-[#D6E0FF]',
+    text: 'text-[#131722]',
+    muted: 'text-[#3B4C7A]',
+    badge: 'bg-[#2142E7] text-white border-[#2142E7]',
   },
 };
 
@@ -48,6 +48,12 @@ export function WallPreview({ space, testimonials, onCollectClick }: WallPreview
   const [marqueePaused, setMarqueePaused] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const theme = THEME_CLASSES[space.theme] ?? THEME_CLASSES.paper;
+
+  useEffect(() => {
+    return () => {
+      audioRef.current?.pause();
+    };
+  }, []);
 
   const approved = testimonials.filter((t) => t.status === 'approved');
   const radiusClass =
@@ -75,26 +81,28 @@ export function WallPreview({ space, testimonials, onCollectClick }: WallPreview
   };
 
   const renderCard = (item: TestimonialWithAudio, keySuffix = '') => {
-    const initials = item.authorName
-      .split(/\s+/)
-      .map((p) => p[0] ?? '')
-      .join('')
-      .slice(0, 2)
-      .toUpperCase();
+    const initials =
+      item.authorName
+        .split(/\s+/)
+        .map((p) => p[0] ?? '')
+        .join('')
+        .slice(0, 2)
+        .toUpperCase() || 'VV';
     const isPlaying = playingId === item.id;
+    const clampedRating = Math.max(0, Math.min(5, Math.round(item.rating || 5)));
     const roleLine = space.showCompany
-      ? [item.authorRole, item.authorCompany].filter(Boolean).join(' · ')
+      ? [item.authorRole, item.authorCompany].filter(Boolean).join(', ')
       : item.authorRole;
 
     return (
       <article
         key={`${item.id}${keySuffix}`}
-        className={`break-inside-avoid border p-5 transition hover:-translate-y-0.5 ${radiusClass} ${theme.card}`}
+        className={`break-inside-avoid border p-5 ${radiusClass} ${theme.card}`}
       >
         <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
           {space.showRatings ? (
-            <div className="flex items-center gap-0.5 text-amber-400" aria-label={`${item.rating} stars`}>
-              {Array.from({ length: item.rating }).map((_, idx) => (
+            <div className="flex items-center gap-0.5 text-amber-500" aria-label={`${clampedRating} stars`}>
+              {Array.from({ length: clampedRating }).map((_, idx) => (
                 <Star key={idx} className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
               ))}
             </div>
@@ -107,16 +115,40 @@ export function WallPreview({ space, testimonials, onCollectClick }: WallPreview
               <button
                 type="button"
                 onClick={() => togglePlay(item)}
-                className={`inline-flex cursor-pointer items-center gap-1 rounded-full border px-2.5 py-0.5 text-[11px] font-semibold transition ${theme.badge}`}
+                className={`inline-flex cursor-pointer items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold transition ${
+                  isPlaying
+                    ? 'border-[#E63B2E] bg-[#E63B2E] text-white'
+                    : theme.badge
+                }`}
               >
-                {isPlaying ? <Pause className="h-3 w-3" /> : <Play className="h-3 w-3" />}
-                <span>{isPlaying ? 'Playing…' : `${item.durationSec ?? 18}s voice`}</span>
+                {isPlaying ? (
+                  <>
+                    <Pause className="h-3 w-3 fill-current" />
+                    <span className="flex h-2.5 items-end gap-[2px]" aria-hidden="true">
+                      <span className="vv-eq-bar h-2 w-[2px] rounded-full bg-white" />
+                      <span
+                        className="vv-eq-bar h-2.5 w-[2px] rounded-full bg-white"
+                        style={{ animationDelay: '0.18s' }}
+                      />
+                      <span
+                        className="vv-eq-bar h-1.5 w-[2px] rounded-full bg-white"
+                        style={{ animationDelay: '0.35s' }}
+                      />
+                    </span>
+                    <span>Playing</span>
+                  </>
+                ) : (
+                  <>
+                    <Play className="h-3 w-3 fill-current" />
+                    <span className="tabular-nums">{item.durationSec ?? 18}s voice</span>
+                  </>
+                )}
               </button>
             )}
             {space.showMetrics && item.outcomeMetric && (
               <span
-                className="rounded-full px-2.5 py-0.5 text-[11px] font-bold text-white"
-                style={{ backgroundColor: space.brandColor || '#0d7480' }}
+                className="rounded-full px-2.5 py-1 text-[11px] font-bold text-white"
+                style={{ backgroundColor: space.brandColor || '#2142e7' }}
               >
                 {item.outcomeMetric}
               </span>
@@ -125,7 +157,7 @@ export function WallPreview({ space, testimonials, onCollectClick }: WallPreview
         </div>
 
         {item.pullQuote && (
-          <h4 className={`mb-2 text-sm font-bold leading-snug ${theme.text}`}>
+          <h4 className={`font-display mb-2 text-base font-bold leading-snug ${theme.text}`}>
             “{item.pullQuote}”
           </h4>
         )}
@@ -136,7 +168,7 @@ export function WallPreview({ space, testimonials, onCollectClick }: WallPreview
         <div className="flex items-center gap-2.5">
           <div
             className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-xs font-bold text-white"
-            style={{ backgroundColor: item.authorAvatarColor || space.brandColor }}
+            style={{ backgroundColor: item.authorAvatarColor || space.brandColor || '#2142e7' }}
           >
             {initials}
           </div>
@@ -155,11 +187,11 @@ export function WallPreview({ space, testimonials, onCollectClick }: WallPreview
       : '5.0';
 
   return (
-    <div className={`rounded-3xl border p-5 sm:p-7 ${theme.shell}`}>
+    <div className={`rounded-2xl border p-5 sm:p-7 ${theme.shell}`}>
       {approved.length === 0 ? (
         <div className={`py-12 text-center ${theme.muted}`}>
           <Mic className="mx-auto mb-3 h-8 w-8 opacity-60" />
-          <p className="text-sm font-medium">No approved testimonials yet in this space.</p>
+          <p className="text-sm font-medium">No approved reviews yet in this space.</p>
         </div>
       ) : space.layout === 'badge' ? (
         <div className="flex flex-col items-center justify-center gap-4 py-8">
@@ -171,25 +203,25 @@ export function WallPreview({ space, testimonials, onCollectClick }: WallPreview
                 <Star key={i} className="h-4 w-4 fill-amber-400 text-amber-400" />
               ))}
             </div>
-            <span className={`text-sm font-extrabold ${theme.text}`}>{avgRating}/5</span>
+            <span className={`tabular-nums text-sm font-extrabold ${theme.text}`}>{avgRating}/5</span>
             <span className={`text-sm ${theme.muted}`}>
-              from {approved.length} verified customer voice & text reviews
+              from {approved.length} verified customer voice and text reviews
             </span>
           </div>
           <p className={`text-xs ${theme.muted}`}>
-            Floating Social Proof Pill preview — click to open full Wall of Love
+            Compact rating pill layout for headers and pricing pages
           </p>
         </div>
       ) : space.layout === 'marquee' ? (
         <div className="overflow-hidden py-2">
-          <div className="mb-2 flex justify-end">
+          <div className="mb-3 flex justify-end">
             <button
               type="button"
               onClick={() => setMarqueePaused((p) => !p)}
               aria-pressed={marqueePaused}
-              className="cursor-pointer rounded-full border border-slate-300 bg-white px-3 py-1 text-[11px] font-semibold text-slate-700 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/60"
+              className="cursor-pointer rounded-lg border border-[#CED6E3] bg-white px-3 py-1 text-xs font-semibold text-[#131722] hover:bg-[#EEF1F6]"
             >
-              {marqueePaused ? 'Resume stream' : 'Pause stream'}
+              {marqueePaused ? 'Resume scroll' : 'Pause scroll'}
             </button>
           </div>
           <div className="vv-marquee-track" data-paused={marqueePaused ? 'true' : undefined}>
@@ -220,19 +252,19 @@ export function WallPreview({ space, testimonials, onCollectClick }: WallPreview
       )}
 
       {!space.hidePoweredBy && (
-        <div className={`mt-5 flex flex-wrap items-center justify-between gap-2 border-t pt-3 text-xs ${theme.muted} border-current/10`}>
+        <div className={`mt-5 flex flex-wrap items-center justify-between gap-2 border-t pt-3.5 text-xs ${theme.muted} border-current/10`}>
           <span>
-            Verified voice social proof by{' '}
-            <strong style={{ color: space.brandColor }}>VouchVoice</strong>
+            Verified voice reviews by{' '}
+            <strong style={{ color: space.brandColor || '#2142e7' }}>VouchVoice</strong>
           </span>
           {onCollectClick && (
             <button
               type="button"
               onClick={onCollectClick}
               className="cursor-pointer font-semibold underline underline-offset-2"
-              style={{ color: space.brandColor }}
+              style={{ color: space.brandColor || '#2142e7' }}
             >
-              Leave a 20s voice review →
+              Leave a 20s voice review
             </button>
           )}
         </div>

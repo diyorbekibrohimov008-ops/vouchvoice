@@ -3,12 +3,11 @@ import {
   ArrowUpRight,
   Copy,
   Inbox,
-  KeyRound,
-  Mic,
+  Link2,
   Palette,
   Plus,
   RefreshCw,
-  Send,
+  Settings,
   Upload,
 } from 'lucide-react';
 import { api, type TestimonialWithAudio } from '../lib/api';
@@ -18,7 +17,6 @@ import { StudioSyndicateTab } from '../components/studio/StudioSyndicateTab';
 import { StudioImportTab } from '../components/studio/StudioImportTab';
 import { NewSpaceModal, PlanSettingsModal } from '../components/studio/StudioModals';
 import type {
-  PlanTier,
   SpaceConfig,
   SyndicationEvent,
   SyndicationTarget,
@@ -36,9 +34,9 @@ interface StudioPageProps {
   onNavigate: (path: string) => void;
 }
 
-type StudioTab = 'inbox' | 'wall' | 'syndicate' | 'import';
+type StudioTab = 'inbox' | 'wall' | 'import' | 'syndicate';
 
-/** Authenticated multi-brand founder studio (`/studio`). */
+/** Authenticated review studio (`/studio`). */
 export function StudioPage({
   user,
   workspace,
@@ -58,11 +56,12 @@ export function StudioPage({
 
   const [playingId, setPlayingId] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const toastTimerRef = useRef<number | null>(null);
 
   const [showNewSpace, setShowNewSpace] = useState(false);
   const [newSpaceName, setNewSpaceName] = useState('');
   const [newSpaceTagline, setNewSpaceTagline] = useState('');
-  const [newSpaceColor, setNewSpaceColor] = useState('#0d7480');
+  const [newSpaceColor, setNewSpaceColor] = useState('#2142e7');
 
   const [showPlanModal, setShowPlanModal] = useState(false);
   const [customAiKey, setCustomAiKey] = useState('');
@@ -84,11 +83,29 @@ export function StudioPage({
 
   const showToast = (msg: string) => {
     setToast(msg);
-    window.setTimeout(() => setToast(null), 3200);
+    if (toastTimerRef.current !== null) {
+      window.clearTimeout(toastTimerRef.current);
+    }
+    toastTimerRef.current = window.setTimeout(() => {
+      setToast(null);
+      toastTimerRef.current = null;
+    }, 3200);
   };
 
   useEffect(() => {
+    return () => {
+      audioRef.current?.pause();
+      if (toastTimerRef.current !== null) {
+        window.clearTimeout(toastTimerRef.current);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
     if (!activeSpace) return;
+    let active = true;
+    audioRef.current?.pause();
+    setPlayingId(null);
     setWebhookInput(activeSpace.webhookUrl || '');
     setGoogleUrlInput(activeSpace.googleMapsPlaceUrl || '');
     setPhSlugInput(activeSpace.productHuntSlug || '');
@@ -96,13 +113,21 @@ export function StudioPage({
     api
       .getSpaceTestimonials(activeSpace.slug)
       .then((res) => {
+        if (!active) return;
         setTestimonials(res.testimonials);
         setEvents(res.events);
         const firstApproved = res.testimonials.find((t) => t.status === 'approved');
         setSelectedSynId(firstApproved?.id ?? res.testimonials[0]?.id ?? '');
       })
-      .catch((err) => showToast(err instanceof Error ? err.message : 'Failed to load'))
-      .finally(() => setLoading(false));
+      .catch((err) => {
+        if (active) showToast(err instanceof Error ? err.message : 'Failed to load reviews');
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
   }, [activeSpace?.slug]);
 
   const origin =
@@ -113,7 +138,7 @@ export function StudioPage({
       await navigator.clipboard.writeText(text);
       showToast(`Copied ${label}`);
     } catch {
-      showToast('Copy failed — select manually');
+      showToast('Copy failed — select and copy manually');
     }
   };
 
@@ -130,9 +155,9 @@ export function StudioPage({
       setShowNewSpace(false);
       setNewSpaceName('');
       setNewSpaceTagline('');
-      showToast(`Created brand space "${res.space.name}" at $0 extra`);
+      showToast(`Added "${res.space.name}" at $0 extra`);
     } catch (err) {
-      showToast(err instanceof Error ? err.message : 'Failed to create space');
+      showToast(err instanceof Error ? err.message : 'Failed to add brand space');
     }
   };
 
@@ -141,7 +166,7 @@ export function StudioPage({
     try {
       const res = await api.updateSpace(activeSpace.slug, patch);
       onSpacesUpdated(spaces.map((s) => (s.slug === res.space.slug ? res.space : s)));
-      showToast('Saved customization');
+      showToast('Saved changes');
     } catch (err) {
       showToast(err instanceof Error ? err.message : 'Update failed');
     }
@@ -155,9 +180,9 @@ export function StudioPage({
     try {
       const res = await api.updateTestimonial(activeSpace.slug, id, patch);
       setTestimonials((prev) => prev.map((t) => (t.id === id ? res.testimonial : t)));
-      showToast('Updated testimonial');
+      showToast('Review updated');
     } catch (err) {
-      showToast(err instanceof Error ? err.message : 'Failed to update');
+      showToast(err instanceof Error ? err.message : 'Failed to update review');
     }
   };
 
@@ -165,8 +190,18 @@ export function StudioPage({
     if (!activeSpace) return;
     try {
       await api.deleteTestimonial(activeSpace.slug, id);
-      setTestimonials((prev) => prev.filter((t) => t.id !== id));
-      showToast('Deleted testimonial');
+      if (playingId === id) {
+        audioRef.current?.pause();
+        setPlayingId(null);
+      }
+      setTestimonials((prev) => {
+        const next = prev.filter((t) => t.id !== id);
+        if (selectedSynId === id) {
+          setSelectedSynId(next[0]?.id ?? '');
+        }
+        return next;
+      });
+      showToast('Review deleted');
     } catch (err) {
       showToast(err instanceof Error ? err.message : 'Delete failed');
     }
@@ -197,7 +232,7 @@ export function StudioPage({
         showToast(res.event.detail);
       }
     } catch (err) {
-      showToast(err instanceof Error ? err.message : 'Syndication failed');
+      showToast(err instanceof Error ? err.message : 'Share failed');
     }
   };
 
@@ -210,7 +245,7 @@ export function StudioPage({
       setTestimonials(refreshed.testimonials);
       setImportText('');
       setActiveTab('inbox');
-      showToast(`Imported ${res.importedCount} testimonials into ${activeSpace.name}`);
+      showToast(`Imported ${res.importedCount} reviews into ${activeSpace.name}`);
     } catch (err) {
       showToast(err instanceof Error ? err.message : 'Import failed');
     } finally {
@@ -218,32 +253,18 @@ export function StudioPage({
     }
   };
 
-  const handlePlanChange = async (plan: PlanTier) => {
-    try {
-      const res = await api.updateWorkspace({ plan });
-      onWorkspaceUpdated(res.workspace);
-      showToast(
-        `Workspace switched to ${
-          plan === 'lifetime_79'
-            ? '$79 Lifetime License'
-            : plan === 'maintenance_9'
-            ? '$9/mo Maintenance'
-            : 'Free Starter'
-        }`
-      );
-    } catch (err) {
-      showToast(err instanceof Error ? err.message : 'Plan update failed');
-    }
-  };
-
   const handleSaveAiKey = async () => {
-    const res = await api.updateWorkspace({
-      aiProvider: customAiKey.trim() ? 'openai' : 'built_in',
-      customAiKey: customAiKey.trim() || null,
-    });
-    onWorkspaceUpdated(res.workspace);
-    setCustomAiKey('');
-    showToast('AI provider updated');
+    try {
+      const res = await api.updateWorkspace({
+        aiProvider: customAiKey.trim() ? 'openai' : 'built_in',
+        customAiKey: customAiKey.trim() || null,
+      });
+      onWorkspaceUpdated(res.workspace);
+      setCustomAiKey('');
+      showToast('AI settings updated');
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : 'Failed to save AI settings');
+    }
   };
 
   const handleResetDemo = async () => {
@@ -252,7 +273,7 @@ export function StudioPage({
       onWorkspaceUpdated(res.workspace);
       onSpacesUpdated(res.spaces);
       setActiveSlug(res.spaces[0]?.slug ?? '');
-      showToast('Demo workspace reset');
+      showToast('Demo studio reset');
     } catch (err) {
       showToast(err instanceof Error ? err.message : 'Reset failed');
     }
@@ -276,113 +297,155 @@ export function StudioPage({
   if (!activeSpace) {
     return (
       <div className="mx-auto max-w-2xl px-4 py-16 text-center">
-        <h2 className="text-xl font-bold">No spaces yet</h2>
+        <h1 className="font-display text-2xl font-bold text-[#131722]">No brand spaces yet</h1>
+        <p className="mt-2 text-sm text-[#4B5568]">
+          Add your first brand space to start collecting 20-second voice reviews for free.
+        </p>
+        <button
+          type="button"
+          onClick={() => setShowNewSpace(true)}
+          className="mt-5 cursor-pointer rounded-xl bg-[#2142E7] px-5 py-2.5 text-sm font-bold text-white hover:bg-[#1935C7]"
+        >
+          Add brand space
+        </button>
       </div>
     );
   }
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6">
+    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       {toast && (
-        <div className="fixed right-5 bottom-5 z-50 rounded-2xl bg-slate-900 px-4 py-3 text-xs font-bold text-white shadow-xl">
+        <div
+          role="status"
+          className="fixed right-5 bottom-5 z-50 rounded-xl bg-[#131722] px-4 py-3 text-xs font-bold text-white shadow-xl"
+        >
           {toast}
         </div>
       )}
 
-      <div className="flex flex-wrap items-center justify-between gap-4 rounded-3xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
-        <div className="flex flex-wrap items-center gap-3">
+      {/* Studio Control Header */}
+      <div className="rounded-2xl border border-[#DCE2EC] bg-white p-5 sm:p-6">
+        <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
-              {workspace.name} · {spaces.length} Brand {spaces.length === 1 ? 'Space' : 'Spaces'} ($0 extra)
-            </div>
-            <div className="mt-1 flex flex-wrap items-center gap-2">
-              <select
-                value={activeSpace.slug}
-                onChange={(e) => setActiveSlug(e.target.value)}
-                className="cursor-pointer rounded-xl border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm font-extrabold text-slate-900 focus:border-teal-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/40"
-              >
-                {spaces.map((s) => (
-                  <option key={s.slug} value={s.slug}>
-                    {s.name} (/{s.slug})
-                  </option>
-                ))}
-              </select>
+            <h1 className="font-display text-2xl font-extrabold tracking-tight text-[#131722]">
+              Review Studio
+            </h1>
+            <p className="mt-1 text-sm text-[#4B5568]">
+              Collect customer reviews by voice in 20 seconds and put them on your website — free.
+            </p>
+          </div>
 
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={() => copyText(`${origin}/collect/${activeSpace.slug}`, 'voice link')}
+              className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-[#2142E7] px-5 py-2.5 text-sm font-bold text-white transition hover:bg-[#1935C7]"
+            >
+              <Copy className="h-4 w-4" />
+              <span>Copy voice link</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => onNavigate(`/wall/${activeSpace.slug}`)}
+              className="inline-flex cursor-pointer items-center gap-1 rounded-xl border border-[#CED6E3] bg-white px-3.5 py-2.5 text-xs font-semibold text-[#131722] transition hover:bg-[#F4F6F8]"
+            >
+              <span>Preview page</span>
+              <ArrowUpRight className="h-3.5 w-3.5" />
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setShowPlanModal(true)}
+              className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl border border-[#CED6E3] bg-[#F4F6F8] px-3.5 py-2.5 text-xs font-semibold text-[#364055] transition hover:bg-[#E5E9F0]"
+            >
+              <Settings className="h-3.5 w-3.5 text-[#576278]" />
+              <span>Optional AI settings</span>
+            </button>
+
+            {user.isDemo && (
               <button
                 type="button"
-                onClick={() => setShowNewSpace(true)}
-                className="inline-flex cursor-pointer items-center gap-1 rounded-xl border border-teal-200 bg-teal-50 px-3 py-1.5 text-xs font-bold text-teal-800 hover:bg-teal-100"
+                onClick={handleResetDemo}
+                title="Reset demo data"
+                aria-label="Reset demo data"
+                className="inline-flex cursor-pointer items-center rounded-xl border border-[#CED6E3] p-2.5 text-[#576278] transition hover:bg-[#F4F6F8] hover:text-[#131722]"
               >
-                <Plus className="h-3.5 w-3.5" />
-                <span>Add Brand Space</span>
+                <RefreshCw className="h-3.5 w-3.5" />
               </button>
-            </div>
+            )}
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
-          <button
-            type="button"
-            onClick={() => copyText(`${origin}/collect/${activeSpace.slug}`, 'Voice Collector link')}
-            className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50"
-          >
-            <Copy className="h-3.5 w-3.5 text-teal-700" />
-            <span>Copy Collector Link</span>
-          </button>
+        {/* Brand Space Switcher & 3 Real Steps */}
+        <div className="mt-5 flex flex-wrap items-center justify-between gap-4 border-t border-[#E5E9F0] pt-4">
+          <div className="flex flex-wrap items-center gap-2">
+            <label htmlFor="business-select" className="text-xs font-semibold text-[#576278]">
+              Brand space:
+            </label>
+            <select
+              id="business-select"
+              value={activeSpace.slug}
+              onChange={(e) => setActiveSlug(e.target.value)}
+              className="cursor-pointer rounded-xl border border-[#CED6E3] bg-[#F4F6F8] px-3 py-1.5 text-sm font-bold text-[#131722] focus:border-[#2142E7] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2142E7]/30"
+            >
+              {spaces.map((s) => (
+                <option key={s.slug} value={s.slug}>
+                  {s.name}
+                </option>
+              ))}
+            </select>
 
-          <button
-            type="button"
-            onClick={() => onNavigate(`/collect/${activeSpace.slug}`)}
-            className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl bg-rose-600 px-3 py-2 text-xs font-bold text-white hover:bg-rose-700"
-          >
-            <Mic className="h-3.5 w-3.5" />
-            <span>Open Collector</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => onNavigate(`/wall/${activeSpace.slug}`)}
-            className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-100"
-          >
-            <span>Public Wall</span>
-            <ArrowUpRight className="h-3.5 w-3.5" />
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setShowPlanModal(true)}
-            className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl bg-slate-900 px-3 py-2 text-xs font-bold text-white hover:bg-slate-800"
-          >
-            <KeyRound className="h-3.5 w-3.5 text-emerald-400" />
-            <span>
-              {workspace.plan === 'lifetime_79'
-                ? 'Lifetime ($79)'
-                : workspace.plan === 'maintenance_9'
-                ? '$9/mo Plan'
-                : 'Free Plan'}
-            </span>
-          </button>
-
-          {user.isDemo && (
             <button
               type="button"
-              onClick={handleResetDemo}
-              title="Reset demo data"
-              className="inline-flex cursor-pointer items-center gap-1 rounded-xl border border-slate-200 px-2.5 py-2 text-xs font-semibold text-slate-500 hover:bg-slate-100"
+              onClick={() => setShowNewSpace(true)}
+              className="inline-flex cursor-pointer items-center gap-1 rounded-xl border border-[#C9D6FF] bg-[#EEF2FF] px-3 py-1.5 text-xs font-bold text-[#2142E7] transition hover:bg-[#E0E7FF]"
             >
-              <RefreshCw className="h-3.5 w-3.5" />
+              <Plus className="h-3.5 w-3.5" />
+              <span>Add brand space</span>
             </button>
-          )}
+          </div>
+
+          <ol className="flex flex-wrap items-center gap-4 text-xs text-[#4B5568]">
+            <li>
+              <button
+                type="button"
+                onClick={() => setActiveTab('syndicate')}
+                className="cursor-pointer font-semibold text-[#131722] hover:text-[#2142E7]"
+              >
+                1. Share your link
+              </button>
+            </li>
+            <li>
+              <button
+                type="button"
+                onClick={() => setActiveTab('inbox')}
+                className="cursor-pointer font-semibold text-[#131722] hover:text-[#2142E7]"
+              >
+                2. Approve reviews
+              </button>
+            </li>
+            <li>
+              <button
+                type="button"
+                onClick={() => setActiveTab('wall')}
+                className="cursor-pointer font-semibold text-[#131722] hover:text-[#2142E7]"
+              >
+                3. Copy the widget code
+              </button>
+            </li>
+          </ol>
         </div>
       </div>
 
+      {/* Plain-Language 4 Studio Tabs */}
       <div className="mt-5 flex flex-wrap gap-2">
         {(
           [
-            { id: 'inbox', label: 'Testimonials Inbox', icon: Inbox, count: testimonials.length },
-            { id: 'wall', label: 'Wall of Love & Embeds', icon: Palette },
-            { id: 'syndicate', label: 'Two-Way Syndication', icon: Send },
-            { id: 'import', label: 'Switch from Senja / Import', icon: Upload },
+            { id: 'inbox', label: 'Reviews', icon: Inbox, count: testimonials.length },
+            { id: 'wall', label: 'Website widget', icon: Palette },
+            { id: 'import', label: 'Import', icon: Upload },
+            { id: 'syndicate', label: 'Share link', icon: Link2 },
           ] as const
         ).map((tab) => {
           const Icon = tab.icon;
@@ -392,18 +455,18 @@ export function StudioPage({
               key={tab.id}
               type="button"
               onClick={() => setActiveTab(tab.id)}
-              className={`inline-flex cursor-pointer items-center gap-2 rounded-2xl px-4 py-2.5 text-sm font-bold transition ${
+              className={`inline-flex cursor-pointer items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold transition ${
                 active
-                  ? 'bg-slate-900 text-white shadow-sm'
-                  : 'border border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
+                  ? 'bg-[#131722] text-white'
+                  : 'border border-[#DCE2EC] bg-white text-[#475166] hover:bg-[#EEF1F6] hover:text-[#131722]'
               }`}
             >
               <Icon className="h-4 w-4" />
               <span>{tab.label}</span>
               {'count' in tab && (
                 <span
-                  className={`rounded-full px-2 py-0.5 text-[11px] ${
-                    active ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'
+                  className={`tabular-nums rounded-md px-2 py-0.5 text-xs ${
+                    active ? 'bg-white/20 text-white' : 'bg-[#EEF1F6] text-[#364055]'
                   }`}
                 >
                   {tab.count}
@@ -434,7 +497,6 @@ export function StudioPage({
       {activeTab === 'wall' && (
         <StudioWallTab
           space={activeSpace}
-          workspacePlan={workspace.plan}
           testimonials={testimonials}
           origin={origin}
           embedType={embedType}
@@ -442,6 +504,16 @@ export function StudioPage({
           onPatchSpace={handlePatchSpace}
           onCopyText={copyText}
           onCollectClick={() => onNavigate(`/collect/${activeSpace.slug}`)}
+        />
+      )}
+
+      {activeTab === 'import' && (
+        <StudioImportTab
+          spaceName={activeSpace.name}
+          importText={importText}
+          onImportTextChange={setImportText}
+          importing={importing}
+          onImport={handleImport}
         />
       )}
 
@@ -468,16 +540,7 @@ export function StudioPage({
           }
           onSyndicate={handleSyndicate}
           onCopyText={copyText}
-        />
-      )}
-
-      {activeTab === 'import' && (
-        <StudioImportTab
-          spaceName={activeSpace.name}
-          importText={importText}
-          onImportTextChange={setImportText}
-          importing={importing}
-          onImport={handleImport}
+          onOpenCollector={() => onNavigate(`/collect/${activeSpace.slug}`)}
         />
       )}
 
@@ -498,7 +561,6 @@ export function StudioPage({
         workspace={workspace}
         customAiKey={customAiKey}
         onCustomAiKeyChange={setCustomAiKey}
-        onSelectPlan={handlePlanChange}
         onSaveAiKey={handleSaveAiKey}
         onClose={() => setShowPlanModal(false)}
       />

@@ -1,6 +1,7 @@
 {
   "name": "vouchvoice",
   "version": "1.0.0",
+  "description": "Collect customer reviews by voice in 20 seconds and put them on your website — 100% free.",
   "private": true,
   "type": "module",
   "scripts": {

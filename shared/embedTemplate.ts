@@ -55,6 +55,11 @@ export function getThemePalette(theme: SpaceConfig['theme']) {
   }
 }
 
+function safeHexColor(color: string | undefined, fallback = '#2142e7'): string {
+  const trimmed = (color ?? '').trim();
+  return /^#[0-9a-fA-F]{3,8}$/.test(trimmed) ? trimmed : fallback;
+}
+
 export function buildStandaloneLifetimeHtml(
   space: SpaceConfig,
   testimonials: Testimonial[],
@@ -62,13 +67,15 @@ export function buildStandaloneLifetimeHtml(
 ): string {
   const approved = testimonials.filter((t) => t.status === 'approved');
   const palette = getThemePalette(space.theme);
+  const accent = safeHexColor(space.brandColor);
   const radius =
     space.cardRadius === 'sharp' ? '6px' : space.cardRadius === 'pill' ? '24px' : '16px';
 
   const cardsHtml = approved
     .map((item) => {
+      const clampedRating = Math.max(0, Math.min(5, Math.round(item.rating || 5)));
       const stars = space.showRatings
-        ? `<div class="vv-stars" aria-label="${item.rating} out of 5 stars">${'★'.repeat(item.rating)}${'☆'.repeat(5 - item.rating)}</div>`
+        ? `<div class="vv-stars" aria-label="${clampedRating} out of 5 stars">${'★'.repeat(clampedRating)}${'☆'.repeat(5 - clampedRating)}</div>`
         : '';
       const metric =
         space.showMetrics && item.outcomeMetric
@@ -76,10 +83,10 @@ export function buildStandaloneLifetimeHtml(
           : '';
       const voiceBadge =
         space.showVoiceBadge && item.hasAudio
-          ? `<span class="vv-voice">🎙 ${item.durationSec ?? 20}s voice note</span>`
+          ? `<span class="vv-voice">${item.durationSec ?? 20}s voice note</span>`
           : '';
       const roleLine = space.showCompany
-        ? [item.authorRole, item.authorCompany].filter(Boolean).join(' · ')
+        ? [item.authorRole, item.authorCompany].filter(Boolean).join(', ')
         : item.authorRole;
       const initials = item.authorName
         .split(/\s+/)
@@ -97,7 +104,7 @@ export function buildStandaloneLifetimeHtml(
         ${item.pullQuote ? `<h3 class="vv-quote">“${escapeHtml(item.pullQuote)}”</h3>` : ''}
         <p class="vv-body">${escapeHtml(item.cleanedText)}</p>
         <footer class="vv-author">
-          <div class="vv-avatar" style="background:${escapeHtml(item.authorAvatarColor || space.brandColor)}">${escapeHtml(initials)}</div>
+          <div class="vv-avatar" style="background:${safeHexColor(item.authorAvatarColor, accent)}">${escapeHtml(initials)}</div>
           <div>
             <div class="vv-name">${escapeHtml(item.authorName)}</div>
             ${roleLine ? `<div class="vv-role">${escapeHtml(roleLine)}</div>` : ''}
@@ -116,7 +123,7 @@ export function buildStandaloneLifetimeHtml(
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>${escapeHtml(space.name)} — Wall of Love (Self-Hosted Lifetime Embed)</title>
+  <title>${escapeHtml(space.name)} — Wall of Love (Self-Hosted Standalone Embed)</title>
   <style>
     * { box-sizing: border-box; }
     body {
@@ -157,7 +164,7 @@ export function buildStandaloneLifetimeHtml(
     .vv-name { font-size: 13px; font-weight: 700; }
     .vv-role { font-size: 12px; color: ${palette.muted}; }
     .vv-footer { margin-top: 18px; text-align: center; font-size: 12px; color: ${palette.muted}; }
-    .vv-footer a { color: ${escapeHtml(space.brandColor)}; text-decoration: none; font-weight: 600; }
+    .vv-footer a { color: ${accent}; text-decoration: none; font-weight: 600; }
   </style>
 </head>
 <body>

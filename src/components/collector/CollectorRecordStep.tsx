@@ -1,9 +1,7 @@
 import {
-  ArrowRight,
   Mic,
   Pause,
   Play,
-  Sparkles,
   Square,
   Upload,
   Wand2,
@@ -32,7 +30,7 @@ interface CollectorRecordStepProps {
   onPolish: () => void;
 }
 
-/** Step 1 of the collector flow: guided prompt, 20s voice recorder, and raw transcript input. */
+/** Step 1 of the collector flow: guided prompt, 20s voice recorder deck, and raw transcript input. */
 export function CollectorRecordStep({
   brandColor,
   prompts,
@@ -56,18 +54,23 @@ export function CollectorRecordStep({
   onPolish,
 }: CollectorRecordStepProps) {
   return (
-    <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-lg shadow-slate-900/5 sm:p-7">
-      <div className="rounded-2xl border border-teal-100 bg-teal-50/70 p-4">
-        <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-teal-800">
-          <span>Guided Prompt {activePromptIdx + 1} of 3</span>
-          <div className="flex gap-1">
+    <div className="overflow-hidden rounded-[24px] border border-[#DCE2EC] bg-white shadow-xl shadow-[#131722]/6">
+      {/* Dark Audio Recorder Deck */}
+      <div className="bg-[#131722] p-5 text-white sm:p-7">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-4">
+          <span className="text-xs font-medium text-[#A9B4C9]">
+            Question {activePromptIdx + 1} of 3
+          </span>
+          <div className="flex gap-1.5">
             {prompts.map((_, i) => (
               <button
                 key={i}
                 type="button"
                 onClick={() => onSelectPrompt(i)}
-                className={`cursor-pointer rounded-full px-2 py-0.5 text-[11px] ${
-                  activePromptIdx === i ? 'bg-teal-700 text-white' : 'bg-white text-teal-800'
+                className={`cursor-pointer rounded-md px-2.5 py-1 text-xs font-semibold transition ${
+                  activePromptIdx === i
+                    ? 'bg-[#2142E7] text-white'
+                    : 'bg-white/10 text-[#C6D0E2] hover:bg-white/20'
                 }`}
               >
                 Q{i + 1}
@@ -75,62 +78,91 @@ export function CollectorRecordStep({
             ))}
           </div>
         </div>
-        <p className="mt-2 text-base font-bold text-slate-900">“{prompts[activePromptIdx]}”</p>
-        <p className="mt-1 text-xs text-slate-500">
-          Speak naturally with “um”s and pauses — AI cleans everything before you approve.
+
+        <p className="font-display mt-4 text-xl font-bold leading-snug text-white">
+          “{prompts[activePromptIdx]}”
         </p>
-      </div>
+        <p className="mt-1.5 text-xs text-[#9AA6BE]">
+          Speak naturally with “um”s and pauses. You can review and edit the cleaned quote before posting.
+        </p>
 
-      <div className="mt-6 flex flex-col items-center">
-        <div className="flex h-16 items-end justify-center gap-1.5">
-          {levels.map((lv, idx) => (
-            <div
-              key={idx}
-              className="w-1.5 rounded-full transition-[height,opacity] duration-100"
-              style={{
-                height: `${Math.max(18, lv)}%`,
-                backgroundColor: recording ? '#e11d48' : brandColor,
-                opacity: recording ? 0.95 : 0.35,
-              }}
-            />
-          ))}
+        {/* Live Waveform Stage */}
+        <div className="mt-6 rounded-2xl border border-white/10 bg-[#1B2130] px-4 py-5">
+          <div className="mb-3 flex items-center justify-between text-xs text-[#A9B4C9]">
+            <span className="inline-flex items-center gap-2 font-medium text-white">
+              <span
+                className={`h-2 w-2 rounded-full ${
+                  recording ? 'animate-pulse bg-[#E63B2E]' : 'bg-white/40'
+                }`}
+                aria-hidden="true"
+              />
+              <span>{recording ? 'Recording voice note' : hasAudio ? 'Voice note ready' : 'Ready to record'}</span>
+            </span>
+            <span className="font-mono-code tabular-nums">
+              00:{String(seconds).padStart(2, '0')} / 00:20
+            </span>
+          </div>
+
+          <div className="flex h-16 items-end justify-center gap-1.5">
+            {levels.map((lv, idx) => (
+              <div
+                key={idx}
+                className="w-1.5 rounded-full transition-[height,opacity] duration-100"
+                style={{
+                  height: `${Math.max(18, lv)}%`,
+                  backgroundColor: recording ? '#E63B2E' : brandColor || '#2142E7',
+                  opacity: recording ? 0.95 : 0.5,
+                }}
+              />
+            ))}
+          </div>
+
+          <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
+            {!recording ? (
+              <button
+                type="button"
+                onClick={onStartRecording}
+                className="inline-flex cursor-pointer items-center gap-2 rounded-full bg-[#E63B2E] px-6 py-3 text-sm font-bold text-white transition hover:bg-[#D12F23]"
+              >
+                <Mic className="h-4 w-4" />
+                <span>{hasAudio ? 'Record again' : 'Start 20s recording'}</span>
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={onStopRecording}
+                className="inline-flex cursor-pointer items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-bold text-[#131722] transition hover:bg-[#EEF1F6]"
+              >
+                <Square className="h-3.5 w-3.5 fill-[#E63B2E] text-[#E63B2E]" />
+                <span className="tabular-nums">Stop recording ({seconds}s)</span>
+              </button>
+            )}
+
+            {audioPreviewUrl && (
+              <button
+                type="button"
+                onClick={onTogglePreview}
+                className="inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-4 py-3 text-xs font-bold text-white transition hover:bg-white/20"
+              >
+                {playingPreview ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
+                <span>{playingPreview ? 'Pause playback' : `Play voice (${seconds || 18}s)`}</span>
+              </button>
+            )}
+          </div>
         </div>
 
-        <div className="mt-4 flex items-center gap-3">
-          {!recording ? (
-            <button
-              type="button"
-              onClick={onStartRecording}
-              className="inline-flex cursor-pointer items-center gap-2.5 rounded-full bg-rose-600 px-7 py-3.5 text-sm font-bold text-white shadow-lg shadow-rose-600/25 transition hover:bg-rose-700"
-            >
-              <Mic className="h-4.5 w-4.5" />
-              <span>{hasAudio ? 'Re-record Voice Note' : 'Tap to Record (20s)'}</span>
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={onStopRecording}
-              className="inline-flex cursor-pointer items-center gap-2.5 rounded-full bg-slate-900 px-7 py-3.5 text-sm font-bold text-white shadow-lg transition hover:bg-slate-800"
-            >
-              <Square className="h-4 w-4 fill-rose-500 text-rose-500" />
-              <span>Stop Recording · {seconds}s</span>
-            </button>
-          )}
-        </div>
-
-        <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
+        <div className="mt-4 flex flex-wrap items-center justify-center gap-2.5 text-xs">
           <button
             type="button"
             onClick={onSampleVoice}
-            className="inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-teal-200 bg-teal-50 px-3.5 py-1.5 text-xs font-bold text-teal-800 hover:bg-teal-100"
+            className="cursor-pointer rounded-lg border border-white/15 bg-white/8 px-3.5 py-1.5 font-semibold text-white transition hover:bg-white/15"
           >
-            <Sparkles className="h-3.5 w-3.5" />
-            <span>Try Sample 18s Voice Note</span>
+            Load sample 18s voice note
           </button>
 
-          <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100">
+          <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-white/15 bg-white/8 px-3.5 py-1.5 font-semibold text-[#D8DFEC] transition hover:bg-white/15">
             <Upload className="h-3.5 w-3.5" />
-            <span>Upload audio</span>
+            <span>Upload audio file</span>
             <input
               type="file"
               accept="audio/*"
@@ -138,52 +170,45 @@ export function CollectorRecordStep({
               className="hidden"
             />
           </label>
-
-          {audioPreviewUrl && (
-            <button
-              type="button"
-              onClick={onTogglePreview}
-              className="inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3.5 py-1.5 text-xs font-bold text-emerald-700"
-            >
-              {playingPreview ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
-              <span>{playingPreview ? 'Pause Audio' : `Play Voice (${seconds || 18}s)`}</span>
-            </button>
-          )}
         </div>
       </div>
 
-      <div className="mt-6">
-        <label className="mb-1.5 flex items-center justify-between text-xs font-bold text-slate-700">
-          <span>Live voice transcript (or type your raw thoughts)</span>
-          <span className="font-normal text-slate-400">
+      {/* Transcript & Polish Action */}
+      <div className="p-5 sm:p-7">
+        <label
+          htmlFor="collector-transcript"
+          className="mb-1.5 flex items-center justify-between text-xs font-bold text-[#131722]"
+        >
+          <span>Live transcript (or type your raw thoughts)</span>
+          <span className="font-normal text-[#576278]">
             {rawTranscript.trim() ? `${rawTranscript.trim().split(/\s+/).length} words` : 'Optional'}
           </span>
         </label>
         <textarea
+          id="collector-transcript"
           rows={4}
           value={rawTranscript}
           onChange={(e) => onChangeTranscript(e.target.value)}
-          placeholder="As you speak, your raw words appear here (or type messy bullet points and let AI clean them into an authentic review)…"
-          className="w-full rounded-2xl border border-slate-200 bg-slate-50/60 p-3.5 text-sm leading-relaxed text-slate-800 focus:border-teal-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/40"
+          placeholder="Your spoken words appear here as you record, or type messy notes and let VouchVoice clean them into a review…"
+          className="w-full rounded-xl border border-[#CED6E3] bg-[#F4F6F8] p-3.5 text-sm leading-relaxed text-[#131722] focus:border-[#2142E7] focus:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2142E7]/30"
         />
+
+        {error && (
+          <div role="alert" className="mt-3 rounded-xl bg-[#FEF2F2] px-3.5 py-2.5 text-xs font-medium text-[#B91C1C]">
+            {error}
+          </div>
+        )}
+
+        <button
+          type="button"
+          disabled={polishing}
+          onClick={onPolish}
+          className="mt-5 flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-[#2142E7] py-3.5 text-sm font-bold text-white transition hover:bg-[#1935C7] disabled:opacity-60"
+        >
+          <Wand2 className="h-4 w-4" />
+          <span>{polishing ? 'Cleaning transcript…' : 'Clean transcript and preview review'}</span>
+        </button>
       </div>
-
-      {error && (
-        <div className="mt-3 rounded-xl bg-rose-50 px-3.5 py-2.5 text-xs font-medium text-rose-700">
-          {error}
-        </div>
-      )}
-
-      <button
-        type="button"
-        disabled={polishing}
-        onClick={onPolish}
-        className="mt-5 flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl bg-teal-700 py-3.5 text-sm font-bold text-white shadow-md transition hover:bg-teal-800 disabled:opacity-60"
-      >
-        <Wand2 className="h-4 w-4" />
-        <span>{polishing ? 'Polishing voice transcript…' : 'Clean Transcript & Preview Review'}</span>
-        <ArrowRight className="h-4 w-4" />
-      </button>
     </div>
   );
 }

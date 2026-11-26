@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Sparkles, X } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { X } from 'lucide-react';
 import { api, type AuthResponse } from '../lib/api';
 
 interface AuthModalProps {
@@ -16,6 +16,15 @@ export function AuthModal({ open, onClose, onAuthenticated }: AuthModalProps) {
   const [firstBrandName, setFirstBrandName] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [open, onClose]);
 
   if (!open) return null;
 
@@ -52,83 +61,87 @@ export function AuthModal({ open, onClose, onAuthenticated }: AuthModalProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/50 p-4 backdrop-blur-sm">
-      <div className="relative max-h-[90vh] w-full max-w-md overflow-y-auto overscroll-contain rounded-3xl border border-slate-200 bg-white p-6 shadow-2xl">
+    <div
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+      className="fixed inset-0 z-50 grid place-items-center bg-[#131722]/55 p-4 backdrop-blur-sm"
+    >
+      <div className="relative max-h-[90vh] w-full max-w-md overflow-y-auto overscroll-contain rounded-2xl border border-[#DCE2EC] bg-white p-6 shadow-2xl">
         <button
           type="button"
           onClick={onClose}
           aria-label="Close authentication modal"
-          className="absolute top-4 right-4 cursor-pointer rounded-full p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/60"
+          className="absolute top-4 right-4 cursor-pointer rounded-lg p-1.5 text-[#576278] hover:bg-[#EEF1F6] hover:text-[#131722]"
         >
           <X className="h-5 w-5" />
         </button>
 
-        <h2 className="text-xl font-extrabold text-slate-900">
-          {mode === 'register' ? 'Create your VouchVoice Studio' : 'Welcome back'}
+        <h2 className="font-display text-2xl font-extrabold text-[#131722]">
+          {mode === 'register' ? 'Create your free studio' : 'Welcome back'}
         </h2>
-        <p className="mt-1 text-sm text-slate-500">
-          Unlimited brand spaces, 20-second voice notes, zero camera friction.
+        <p className="mt-1 text-sm text-[#4B5568]">
+          Collect customer reviews by voice in 20 seconds and put them on your website — free.
         </p>
 
         <button
           type="button"
           onClick={handleDemo}
           disabled={loading}
-          className="mt-4 flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl border border-teal-200 bg-teal-50 px-4 py-3 text-sm font-bold text-teal-800 transition hover:bg-teal-100"
+          className="mt-4 flex w-full cursor-pointer items-center justify-center rounded-xl bg-[#2142E7] px-4 py-3 text-sm font-bold text-white transition hover:bg-[#1935C7] disabled:opacity-60"
         >
-          <Sparkles className="h-4 w-4" />
-          <span>1-Click Instant Demo Workspace (2 Brands)</span>
+          Open instant demo studio
         </button>
 
-        <div className="my-4 flex items-center gap-3 text-xs text-slate-400">
-          <div className="h-px flex-1 bg-slate-200" />
+        <div className="my-4 flex items-center gap-3 text-xs text-[#6B768C]">
+          <div className="h-px flex-1 bg-[#E5E9F0]" />
           <span>or continue with email</span>
-          <div className="h-px flex-1 bg-slate-200" />
+          <div className="h-px flex-1 bg-[#E5E9F0]" />
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-3">
           {mode === 'register' && (
             <>
               <div>
-                <label className="mb-1 block text-xs font-semibold text-slate-700">Your name</label>
+                <label className="mb-1 block text-xs font-semibold text-[#131722]">Your name</label>
                 <input
                   type="text"
                   required
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Alex Rivera"
-                  className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm focus:border-teal-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/40"
+                  className="w-full rounded-xl border border-[#CED6E3] px-3.5 py-2.5 text-sm focus:border-[#2142E7] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2142E7]/30"
                 />
               </div>
               <div>
-                <label className="mb-1 block text-xs font-semibold text-slate-700">
-                  First brand / product name
+                <label className="mb-1 block text-xs font-semibold text-[#131722]">
+                  First brand or product name
                 </label>
                 <input
                   type="text"
                   value={firstBrandName}
                   onChange={(e) => setFirstBrandName(e.target.value)}
                   placeholder="SignalBoard"
-                  className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm focus:border-teal-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/40"
+                  className="w-full rounded-xl border border-[#CED6E3] px-3.5 py-2.5 text-sm focus:border-[#2142E7] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2142E7]/30"
                 />
               </div>
             </>
           )}
 
           <div>
-            <label className="mb-1 block text-xs font-semibold text-slate-700">Email</label>
+            <label className="mb-1 block text-xs font-semibold text-[#131722]">Email</label>
             <input
               type="email"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="founder@signalboard.io"
-              className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm focus:border-teal-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/40"
+              className="w-full rounded-xl border border-[#CED6E3] px-3.5 py-2.5 text-sm focus:border-[#2142E7] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2142E7]/30"
             />
           </div>
 
           <div>
-            <label className="mb-1 block text-xs font-semibold text-slate-700">Password</label>
+            <label className="mb-1 block text-xs font-semibold text-[#131722]">Password</label>
             <input
               type="password"
               required
@@ -136,12 +149,12 @@ export function AuthModal({ open, onClose, onAuthenticated }: AuthModalProps) {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="At least 6 characters"
-              className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm focus:border-teal-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/40"
+              className="w-full rounded-xl border border-[#CED6E3] px-3.5 py-2.5 text-sm focus:border-[#2142E7] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2142E7]/30"
             />
           </div>
 
           {error && (
-            <div className="rounded-xl bg-rose-50 px-3 py-2 text-xs font-medium text-rose-700">
+            <div role="alert" className="rounded-xl bg-[#FEF2F2] px-3 py-2 text-xs font-medium text-[#B91C1C]">
               {error}
             </div>
           )}
@@ -149,20 +162,20 @@ export function AuthModal({ open, onClose, onAuthenticated }: AuthModalProps) {
           <button
             type="submit"
             disabled={loading}
-            className="w-full cursor-pointer rounded-xl bg-slate-900 py-2.5 text-sm font-bold text-white transition hover:bg-slate-800 disabled:opacity-60"
+            className="w-full cursor-pointer rounded-xl bg-[#131722] py-2.5 text-sm font-bold text-white transition hover:bg-[#232A3B] disabled:opacity-60"
           >
-            {loading ? 'Working…' : mode === 'register' ? 'Create Free Workspace' : 'Sign In'}
+            {loading ? 'Working…' : mode === 'register' ? 'Create free studio' : 'Sign in'}
           </button>
         </form>
 
-        <div className="mt-4 text-center text-xs text-slate-500">
+        <div className="mt-4 text-center text-xs text-[#576278]">
           {mode === 'register' ? (
             <>
               Already have an account?{' '}
               <button
                 type="button"
                 onClick={() => setMode('login')}
-                className="cursor-pointer font-bold text-teal-700 hover:underline"
+                className="cursor-pointer font-bold text-[#2142E7] hover:underline"
               >
                 Sign in
               </button>
@@ -173,9 +186,9 @@ export function AuthModal({ open, onClose, onAuthenticated }: AuthModalProps) {
               <button
                 type="button"
                 onClick={() => setMode('register')}
-                className="cursor-pointer font-bold text-teal-700 hover:underline"
+                className="cursor-pointer font-bold text-[#2142E7] hover:underline"
               >
-                Create workspace
+                Create free studio
               </button>
             </>
           )}

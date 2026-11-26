@@ -1,11 +1,23 @@
 @import "tailwindcss";
 
+:root {
+  --vv-chalk: #f4f6f8;
+  --vv-ink: #131722;
+  --vv-cobalt: #2142e7;
+  --vv-signal: #e63b2e;
+  --vv-mist: #e5e9f0;
+}
+
 @layer base {
   body {
     font-family: 'Funnel Sans', ui-sans-serif, system-ui, sans-serif;
+    background-color: var(--vv-chalk);
+    color: var(--vv-ink);
   }
 
-  h1, h2, .font-serif-display {
+  h1,
+  h2,
+  .font-display {
     font-family: 'Funnel Display', 'Funnel Sans', sans-serif;
   }
 
@@ -14,7 +26,7 @@
   }
 
   :focus-visible {
-    outline: 2px solid #0d7480;
+    outline: 2px solid var(--vv-cobalt);
     outline-offset: 2px;
   }
 
@@ -32,6 +44,16 @@
   }
 }
 
+@keyframes vv-bar-pulse {
+  0%,
+  100% {
+    transform: scaleY(0.45);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+
 .vv-marquee-track {
   display: flex;
   gap: 1rem;
@@ -44,8 +66,14 @@
   animation-play-state: paused;
 }
 
+.vv-eq-bar {
+  transform-origin: bottom;
+  animation: vv-bar-pulse 0.72s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .vv-marquee-track {
+  .vv-marquee-track,
+  .vv-eq-bar {
     animation: none;
   }
   *,

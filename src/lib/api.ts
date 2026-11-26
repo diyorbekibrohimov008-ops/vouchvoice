@@ -1,5 +1,4 @@
 import type {
-  PlanTier,
   ReviewTone,
   SpaceConfig,
   SyndicationEvent,
@@ -44,7 +43,17 @@ async function request<T>(url: string, init?: RequestInit): Promise<T> {
   });
 
   const text = await res.text();
-  const data = text ? JSON.parse(text) : {};
+  let data: unknown = {};
+  if (text) {
+    try {
+      data = JSON.parse(text);
+    } catch {
+      if (!res.ok) {
+        throw new Error(`Request failed (${res.status})`);
+      }
+      throw new Error('Unexpected response from server');
+    }
+  }
   if (!res.ok) {
     throw new Error((data as { error?: string }).error || `Request failed (${res.status})`);
   }
@@ -68,7 +77,6 @@ export const api = {
 
   updateWorkspace: (payload: {
     name?: string;
-    plan?: PlanTier;
     aiProvider?: 'built_in' | 'openai' | 'gemini';
     customAiKey?: string | null;
   }) => request<{ workspace: Workspace }>('/api/workspace', { method: 'PATCH', body: JSON.stringify(payload) }),
@@ -238,7 +246,12 @@ function wrapTextLines(text: string, maxChars: number, maxLines: number): string
 }
 
 export function buildQuoteCardSvg(testimonial: Testimonial, space: SpaceConfig): string {
-  const accent = space.brandColor || '#0d7480';
+  const accent = /^#[0-9a-fA-F]{3,8}$/.test((space.brandColor || '').trim())
+    ? space.brandColor.trim()
+    : '#2142e7';
+  const avatarBg = /^#[0-9a-fA-F]{3,8}$/.test((testimonial.authorAvatarColor || '').trim())
+    ? testimonial.authorAvatarColor.trim()
+    : accent;
   const lines = wrapTextLines(`"${testimonial.cleanedText}"`, 54, 5);
   const tspans = lines
     .map((line, i) => `<tspan x="64" dy="${i === 0 ? 0 : 40}">${escapeXml(line)}</tspan>`)
@@ -246,29 +259,37 @@ export function buildQuoteCardSvg(testimonial: Testimonial, space: SpaceConfig):
 
   const attribution = [testimonial.authorName, testimonial.authorRole, testimonial.authorCompany]
     .filter(Boolean)
-    .join(' · ');
+    .join(', ');
+
+  const initials =
+    testimonial.authorName
+      .split(/\s+/)
+      .map((part) => part[0] ?? '')
+      .join('')
+      .slice(0, 2)
+      .toUpperCase() || 'VV';
 
   const badge = testimonial.outcomeMetric
-    ? `<rect x="64" y="54" rx="16" width="${Math.min(340, testimonial.outcomeMetric.length * 10 + 44)}" height="34" fill="#ecfdf5" />
-       <text x="82" y="76" font-family="Funnel Sans, system-ui, sans-serif" font-size="15" font-weight="700" fill="#047857">${escapeXml(testimonial.outcomeMetric)}</text>`
-    : `<text x="64" y="78" font-family="Funnel Sans, system-ui, sans-serif" font-size="16" font-weight="700" fill="${escapeXml(accent)}">★★★★★ Verified Customer Story</text>`;
+    ? `<rect x="64" y="54" rx="16" width="${Math.min(340, testimonial.outcomeMetric.length * 10 + 44)}" height="34" fill="#eef2ff" />
+       <text x="82" y="76" font-family="Funnel Sans, system-ui, sans-serif" font-size="15" font-weight="700" fill="${escapeXml(accent)}">${escapeXml(testimonial.outcomeMetric)}</text>`
+    : `<text x="64" y="78" font-family="Funnel Sans, system-ui, sans-serif" font-size="16" font-weight="700" fill="${escapeXml(accent)}">★★★★★ Verified Customer Voice</text>`;
 
   return `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#f6f8f9"/>
-      <stop offset="100%" stop-color="#e6f4f5"/>
+      <stop offset="0%" stop-color="#f4f6f8"/>
+      <stop offset="100%" stop-color="#e8edf5"/>
     </linearGradient>
   </defs>
   <rect width="1200" height="630" fill="url(#bg)"/>
-  <rect x="36" y="36" width="1128" height="558" rx="28" fill="#ffffff" stroke="#e2e8f0" stroke-width="2"/>
+  <rect x="36" y="36" width="1128" height="558" rx="24" fill="#ffffff" stroke="#e5e9f0" stroke-width="2"/>
   ${badge}
-  <text x="64" y="158" font-family="Funnel Sans, system-ui, sans-serif" font-size="30" font-weight="600" fill="#0f172a">${tspans}</text>
-  <line x1="64" y1="455" x2="1136" y2="455" stroke="#f1f5f9" stroke-width="2"/>
-  <circle cx="92" cy="518" r="28" fill="${escapeXml(testimonial.authorAvatarColor || accent)}"/>
-  <text x="92" y="525" text-anchor="middle" font-family="Funnel Sans, system-ui, sans-serif" font-size="18" font-weight="700" fill="#ffffff">${escapeXml(testimonial.authorName.slice(0, 2).toUpperCase())}</text>
-  <text x="136" y="512" font-family="Funnel Sans, system-ui, sans-serif" font-size="22" font-weight="700" fill="#0f172a">${escapeXml(testimonial.authorName)}</text>
-  <text x="136" y="540" font-family="Funnel Sans, system-ui, sans-serif" font-size="17" fill="#64748b">${escapeXml(attribution)}</text>
+  <text x="64" y="158" font-family="Funnel Sans, system-ui, sans-serif" font-size="30" font-weight="600" fill="#131722">${tspans}</text>
+  <line x1="64" y1="455" x2="1136" y2="455" stroke="#e5e9f0" stroke-width="2"/>
+  <circle cx="92" cy="518" r="28" fill="${escapeXml(avatarBg)}"/>
+  <text x="92" y="525" text-anchor="middle" font-family="Funnel Sans, system-ui, sans-serif" font-size="18" font-weight="700" fill="#ffffff">${escapeXml(initials)}</text>
+  <text x="136" y="512" font-family="Funnel Sans, system-ui, sans-serif" font-size="22" font-weight="700" fill="#131722">${escapeXml(testimonial.authorName)}</text>
+  <text x="136" y="540" font-family="Funnel Sans, system-ui, sans-serif" font-size="17" fill="#5b6476">${escapeXml(attribution)}</text>
   <text x="1136" y="526" text-anchor="end" font-family="Funnel Sans, system-ui, sans-serif" font-size="18" font-weight="700" fill="${escapeXml(accent)}">${escapeXml(space.name)}</text>
 </svg>`;
 }

@@ -28,6 +28,27 @@ export function json(data: unknown, status = 200, extraHeaders?: Record<string, 
   });
 }
 
+export async function parseJsonBody<T extends Record<string, unknown>>(
+  req: Request,
+  extraHeaders?: Record<string, string>
+): Promise<{ ok: true; data: T } | { ok: false; errorResponse: Response }> {
+  try {
+    const parsed: unknown = await req.json();
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+      return {
+        ok: false,
+        errorResponse: json({ error: 'Request body must be a JSON object.' }, 400, extraHeaders),
+      };
+    }
+    return { ok: true, data: parsed as T };
+  } catch {
+    return {
+      ok: false,
+      errorResponse: json({ error: 'Invalid JSON request body.' }, 400, extraHeaders),
+    };
+  }
+}
+
 export function slugify(input: string): string {
   return input
     .toLowerCase()

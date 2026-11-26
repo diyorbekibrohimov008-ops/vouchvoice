@@ -12,8 +12,10 @@ import {
   type StoredWorkspaceRecord,
 } from './auth';
 import { DEMO_USER_ID } from './seed';
-import { json, listWorkspaceSpaces, slugify } from './routerHelpers';
-import type { PlanTier, SpaceConfig } from '../../shared/types';
+import { json, listWorkspaceSpaces, parseJsonBody, slugify } from './routerHelpers';
+import type { SpaceConfig } from '../../shared/types';
+
+const ALLOWED_AI_PROVIDERS = new Set(['built_in', 'openai', 'gemini']);
 
 /** Handles account registration, login, logout, and workspace settings updates. */
 export async function handleAuthAndWorkspaceRoutes(
@@ -22,16 +24,18 @@ export async function handleAuthAndWorkspaceRoutes(
   method: string
 ): Promise<Response | null> {
   if (path === '/api/auth/register' && method === 'POST') {
-    const body = (await req.json()) as {
+    const parsed = await parseJsonBody<{
       name?: string;
       email?: string;
       password?: string;
       workspaceName?: string;
       firstBrandName?: string;
-    };
-    const name = (body.name ?? '').trim();
-    const email = (body.email ?? '').trim().toLowerCase();
-    const password = body.password ?? '';
+    }>(req);
+    if (!parsed.ok) return parsed.errorResponse;
+    const body = parsed.data;
+    const name = typeof body.name === 'string' ? body.name.trim() : '';
+    const email = typeof body.email === 'string' ? body.email.trim().toLowerCase() : '';
+    const password = typeof body.password === 'string' ? body.password : '';
     if (!name || !email.includes('@') || password.length < 6) {
       return json({ error: 'Provide your name, valid email, and a password of at least 6 characters.' }, 400);
     }
@@ -44,7 +48,11 @@ export async function handleAuthAndWorkspaceRoutes(
 
     const userId = `usr_${randomUUID().slice(0, 12)}`;
     const workspaceId = `ws_${randomUUID().slice(0, 12)}`;
-    const brandName = (body.firstBrandName ?? `${name.split(' ')[0]}'s Product`).trim();
+    const brandName = (
+      typeof body.firstBrandName === 'string' && body.firstBrandName.trim()
+        ? body.firstBrandName
+        : `${name.split(' ')[0]}'s Product`
+    ).trim();
     const baseSlug = slugify(brandName) || 'my-product';
     const existingSpace = await store.getJSON<SpaceConfig>(DATA_STORE, `spaces/${baseSlug}`);
     const slug = existingSpace ? `${baseSlug}-${randomBytes(2).toString('hex')}` : baseSlug;
@@ -60,7 +68,11 @@ export async function handleAuthAndWorkspaceRoutes(
 
     const workspaceRecord: StoredWorkspaceRecord = {
       id: workspaceId,
-      name: (body.workspaceName ?? `${name.split(' ')[0]}'s Studio`).trim(),
+      name: (
+        typeof body.workspaceName === 'string' && body.workspaceName.trim()
+          ? body.workspaceName
+          : `${name.split(' ')[0]}'s Studio`
+      ).trim(),
       ownerUserId: userId,
       plan: 'free',
       licenseKey: null,
@@ -75,7 +87,7 @@ export async function handleAuthAndWorkspaceRoutes(
       slug,
       name: brandName,
       tagline: `Share a quick 20-second voice note about ${brandName}.`,
-      brandColor: '#0d7480',
+      brandColor: '#2142e7',
       theme: 'paper',
       layout: 'masonry',
       cardRadius: 'soft',
@@ -115,9 +127,11 @@ export async function handleAuthAndWorkspaceRoutes(
   }
 
   if (path === '/api/auth/login' && method === 'POST') {
-    const body = (await req.json()) as { email?: string; password?: string };
-    const email = (body.email ?? '').trim().toLowerCase();
-    const password = body.password ?? '';
+    const parsed = await parseJsonBody<{ email?: string; password?: string }>(req);
+    if (!parsed.ok) return parsed.errorResponse;
+    const body = parsed.data;
+    const email = typeof body.email === 'string' ? body.email.trim().toLowerCase() : '';
+    const password = typeof body.password === 'string' ? body.password : '';
     const store = getStorage();
     const userRecord = await store.getJSON<StoredUserRecord>(DATA_STORE, `users/${email}`);
     if (!userRecord || !verifyPassword(password, userRecord.passwordHash)) {
@@ -160,30 +174,30 @@ export async function handleAuthAndWorkspaceRoutes(
     const ws = await store.getJSON<StoredWorkspaceRecord>(DATA_STORE, key);
     if (!ws) return json({ error: 'Workspace not found' }, 404);
 
-    const body = (await req.json()) as {
+    const parsed = await parseJsonBody<{
       name?: string;
-      plan?: PlanTier;
       aiProvider?: 'built_in' | 'openai' | 'gemini';
       customAiKey?: string | null;
-    };
+    }>(req);
+    if (!parsed.ok) return parsed.errorResponse;
+    const body = parsed.data;
 
-    const nextPlan: PlanTier =
-      body.plan && ['free', 'maintenance_9', 'lifetime_79'].includes(body.plan)
-        ? body.plan
-        : ws.plan;
+    if (body.aiProvider !== undefined && !ALLOWED_AI_PROVIDERS.has(body.aiProvider)) {
+      return json({ error: 'Invalid AI provider.' }, 400);
+    }
 
     const updated: StoredWorkspaceRecord = {
       ...ws,
-      name: body.name?.trim() || ws.name,
-      plan: nextPlan,
-      licenseKey:
-        nextPlan === 'lifetime_79'
-          ? ws.licenseKey || `VV-LIFE-${randomBytes(2).toString('hex').toUpperCase()}-2026`
-          : nextPlan === 'maintenance_9'
-          ? ws.licenseKey || `VV-MAINT-${randomBytes(2).toString('hex').toUpperCase()}`
-          : null,
+      name: typeof body.name === 'string' && body.name.trim() ? body.name.trim() : ws.name,
+      plan: 'free',
+      licenseKey: null,
       aiProvider: body.aiProvider ?? ws.aiProvider,
-      customAiKey: body.customAiKey !== undefined ? body.customAiKey?.trim() || null : ws.customAiKey,
+      customAiKey:
+        body.customAiKey !== undefined
+          ? typeof body.customAiKey === 'string'
+            ? body.customAiKey.trim() || null
+            : null
+          : ws.customAiKey,
     };
     await store.setJSON(DATA_STORE, key, updated);
     return json({ workspace: sanitizeWorkspace(updated) });

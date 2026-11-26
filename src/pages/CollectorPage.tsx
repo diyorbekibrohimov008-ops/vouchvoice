@@ -1,5 +1,4 @@
-import { useEffect, useState } from 'react';
-import { Mic } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 import { api, type PublicSpaceResponse } from '../lib/api';
 import type { ReviewTone, TranscriptAnalysis } from '../../shared/types';
 import { useVoiceRecorder } from '../hooks/useVoiceRecorder';
@@ -37,19 +36,38 @@ export function CollectorPage({ slug, onNavigate }: CollectorPageProps) {
     productHuntUrl: string | null;
   } | null>(null);
   const [copiedTarget, setCopiedTarget] = useState<string | null>(null);
+  const copyTimerRef = useRef<number | null>(null);
 
   const recorder = useVoiceRecorder(setError);
 
   useEffect(() => {
+    return () => {
+      if (copyTimerRef.current !== null) {
+        window.clearTimeout(copyTimerRef.current);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    let active = true;
     setLoadingSpace(true);
     api
       .getPublicSpace(slug)
       .then((res) => {
+        if (!active) return;
         setSpaceData(res);
         setError(null);
       })
-      .catch((err) => setError(err instanceof Error ? err.message : 'Space not found'))
-      .finally(() => setLoadingSpace(false));
+      .catch((err) => {
+        if (!active) return;
+        setError(err instanceof Error ? err.message : 'Space not found');
+      })
+      .finally(() => {
+        if (active) setLoadingSpace(false);
+      });
+    return () => {
+      active = false;
+    };
   }, [slug]);
 
   const handlePolish = async () => {
@@ -127,7 +145,13 @@ export function CollectorPage({ slug, onNavigate }: CollectorPageProps) {
     try {
       await navigator.clipboard.writeText(editedText);
       setCopiedTarget(target);
-      window.setTimeout(() => setCopiedTarget(null), 3000);
+      if (copyTimerRef.current !== null) {
+        window.clearTimeout(copyTimerRef.current);
+      }
+      copyTimerRef.current = window.setTimeout(() => {
+        setCopiedTarget(null);
+        copyTimerRef.current = null;
+      }, 3000);
     } catch {
       // ignore clipboard restrictions
     }
@@ -136,8 +160,8 @@ export function CollectorPage({ slug, onNavigate }: CollectorPageProps) {
 
   if (loadingSpace) {
     return (
-      <div className="mx-auto max-w-2xl px-4 py-16 text-center text-sm text-slate-500">
-        Loading collector…
+      <div className="mx-auto max-w-2xl px-4 py-16 text-center text-sm text-[#576278]">
+        Loading voice recorder…
       </div>
     );
   }
@@ -145,12 +169,12 @@ export function CollectorPage({ slug, onNavigate }: CollectorPageProps) {
   if (!spaceData) {
     return (
       <div className="mx-auto max-w-xl px-4 py-16 text-center">
-        <h1 className="text-2xl font-extrabold text-slate-900">Space not found</h1>
-        <p className="mt-2 text-sm text-slate-500">{error || 'This collection link is unavailable.'}</p>
+        <h1 className="font-display text-2xl font-extrabold text-[#131722]">Review link not found</h1>
+        <p className="mt-2 text-sm text-[#576278]">{error || 'This collection link is unavailable.'}</p>
         <button
           type="button"
           onClick={() => onNavigate('/')}
-          className="mt-5 cursor-pointer rounded-full bg-slate-900 px-5 py-2.5 text-sm font-bold text-white"
+          className="mt-5 cursor-pointer rounded-xl bg-[#131722] px-5 py-2.5 text-sm font-bold text-white"
         >
           Go home
         </button>
@@ -162,19 +186,13 @@ export function CollectorPage({ slug, onNavigate }: CollectorPageProps) {
   const prompts = [space.prompts.step1, space.prompts.step2, space.prompts.step3];
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-8 sm:py-12">
-      <div className="mb-6 text-center">
-        <span
-          className="inline-flex items-center gap-1.5 rounded-full px-3.5 py-1 text-xs font-bold text-white shadow-sm"
-          style={{ backgroundColor: space.brandColor }}
-        >
-          <Mic className="h-3.5 w-3.5" />
-          <span>{space.name}</span>
-        </span>
-        <h1 className="mt-3 text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">
-          Skip the camera — leave a 20-second voice note
+    <div className="mx-auto max-w-2xl px-4 py-10 sm:py-14">
+      <div className="mb-7">
+        <p className="text-sm font-bold text-[#2142E7]">{space.name}</p>
+        <h1 className="font-display mt-1.5 text-3xl font-extrabold tracking-[-0.025em] text-[#131722] sm:text-4xl">
+          Skip the camera and leave a 20-second voice note
         </h1>
-        <p className="mt-2 text-sm text-slate-600">{space.tagline}</p>
+        <p className="mt-2 text-sm text-[#4B5568]">{space.tagline}</p>
       </div>
 
       {step === 'record' && (

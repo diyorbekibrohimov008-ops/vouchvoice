@@ -51,13 +51,15 @@ const WIDGET_SCRIPT = `(function(){
         var theme = host.getAttribute('data-vouch-theme') || sp.theme || 'paper';
         var pal = themeVars(theme);
         var radius = sp.cardRadius === 'sharp' ? '6px' : sp.cardRadius === 'pill' ? '22px' : '16px';
-        var accent = sp.brandColor || '#0d7480';
+        var rawAccent = typeof sp.brandColor === 'string' ? sp.brandColor.trim() : '';
+        var accent = /^#[0-9a-fA-F]{3,8}$/.test(rawAccent) ? rawAccent : '#0d7480';
 
         var gridClass = layout === 'marquee' ? 'vv-marquee' : layout === 'spotlight' ? 'vv-spotlight' : layout === 'badge' ? 'vv-badge-wrap' : layout === 'grid' ? 'vv-grid' : 'vv-masonry';
 
         var cards = items.map(function(t) {
           var initials = (t.authorName || 'C').split(/\\s+/).map(function(p){ return p[0] || ''; }).join('').slice(0,2).toUpperCase();
-          var stars = sp.showRatings ? '<span class="vv-stars">' + '★'.repeat(t.rating || 5) + '</span>' : '';
+          var ratingNum = Math.max(1, Math.min(5, Math.round(Number(t.rating) || 5)));
+          var stars = sp.showRatings ? '<span class="vv-stars">' + '★'.repeat(ratingNum) + '</span>' : '';
           var voiceBtn = (sp.showVoiceBadge && t.hasAudio && t.audioUrl)
             ? '<button type="button" class="vv-audio-btn" data-audio="' + esc(scriptOrigin + t.audioUrl) + '">▶ ' + esc(t.durationSec || 20) + 's voice</button>'
             : '';
@@ -147,7 +149,9 @@ const WIDGET_SCRIPT = `(function(){
             activeAudio = audio;
             activeBtn = btn;
             btn.textContent = '❚❚ Playing…';
-            audio.play().catch(function(){});
+            audio.play().catch(function(){
+              btn.textContent = btn.getAttribute('data-label') || '▶ Voice';
+            });
             audio.onended = function() {
               btn.textContent = btn.getAttribute('data-label') || '▶ Voice';
             };

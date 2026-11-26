@@ -48,76 +48,76 @@ export function CollectorReviewStep({
   return (
     <form
       onSubmit={onSubmit}
-      className="rounded-3xl border border-slate-200 bg-white p-5 shadow-lg shadow-slate-900/5 sm:p-7"
+      className="rounded-2xl border border-[#DCE2EC] bg-white p-5 shadow-lg shadow-[#131722]/5 sm:p-7"
     >
-      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-4">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#E5E9F0] pb-4">
         <div>
-          <h2 className="text-lg font-extrabold text-slate-900">
-            Review & Approve in One Tap
+          <h2 className="font-display text-xl font-extrabold text-[#131722]">
+            Review and approve
           </h2>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-[#576278]">
             {analysis?.fillersRemovedCount
-              ? `Stripped ${analysis.fillersRemovedCount} verbal fillers while keeping your real voice.`
-              : 'Structured into a ready-to-publish review.'}
+              ? `Removed ${analysis.fillersRemovedCount} filler words while keeping your natural phrasing.`
+              : 'Ready for a quick check before publishing.'}
           </p>
         </div>
         <button
           type="button"
           onClick={onBack}
-          className="cursor-pointer text-xs font-bold text-teal-700 hover:underline"
+          className="cursor-pointer text-xs font-bold text-[#2142E7] hover:underline"
         >
-          ← Back to voice
+          Back to recorder
         </button>
       </div>
 
       {analysis && (
         <div className="mt-4 flex flex-wrap items-center justify-between gap-2">
-          <div className="inline-flex rounded-full bg-slate-100 p-1">
+          <div className="inline-flex rounded-lg bg-[#EEF1F6] p-1">
             {(['authentic', 'crisp', 'results'] as const).map((t) => (
               <button
                 key={t}
                 type="button"
                 onClick={() => onToneChange(t)}
-                className={`cursor-pointer rounded-full px-3 py-1 text-xs font-bold capitalize transition ${
-                  selectedTone === t ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500'
+                className={`cursor-pointer rounded-md px-3 py-1 text-xs font-bold capitalize transition ${
+                  selectedTone === t ? 'bg-[#131722] text-white' : 'text-[#4B5568]'
                 }`}
               >
-                {t === 'results' ? 'Results-Led' : t}
+                {t === 'results' ? 'Results-led' : t}
               </button>
             ))}
           </div>
           {analysis.outcomeMetric && (
-            <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700">
-              Metric: {analysis.outcomeMetric}
+            <span className="rounded-md bg-[#EEF2FF] px-3 py-1 text-xs font-bold text-[#2142E7]">
+              Key result: {analysis.outcomeMetric}
             </span>
           )}
         </div>
       )}
 
-      <div className="mt-4 space-y-3">
+      <div className="mt-4 space-y-3.5">
         <div>
-          <label className="mb-1 block text-xs font-bold text-slate-700">Headline Pull Quote</label>
+          <label className="mb-1 block text-xs font-bold text-[#131722]">Headline pull quote</label>
           <input
             type="text"
             value={pullQuote}
             onChange={(e) => onPullQuoteChange(e.target.value)}
-            className="w-full rounded-xl border border-slate-200 px-3.5 py-2 text-sm font-semibold text-slate-900 focus:border-teal-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/40"
+            className="w-full rounded-xl border border-[#CED6E3] px-3.5 py-2 text-sm font-semibold text-[#131722] focus:border-[#2142E7] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2142E7]/30"
           />
         </div>
 
         <div>
-          <label className="mb-1 block text-xs font-bold text-slate-700">Polished Review</label>
+          <label className="mb-1 block text-xs font-bold text-[#131722]">Cleaned review</label>
           <textarea
             rows={4}
             required
             value={editedText}
             onChange={(e) => onEditedTextChange(e.target.value)}
-            className="w-full rounded-xl border border-slate-200 p-3.5 text-sm leading-relaxed text-slate-800 focus:border-teal-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/40"
+            className="w-full rounded-xl border border-[#CED6E3] p-3.5 text-sm leading-relaxed text-[#131722] focus:border-[#2142E7] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2142E7]/30"
           />
         </div>
 
         <div>
-          <label className="mb-1.5 block text-xs font-bold text-slate-700">Your Rating</label>
+          <label className="mb-1.5 block text-xs font-bold text-[#131722]">Your rating</label>
           <div className="flex items-center gap-1.5">
             {[1, 2, 3, 4, 5].map((n) => (
               <button
@@ -129,7 +129,7 @@ export function CollectorReviewStep({
               >
                 <Star
                   className={`h-6 w-6 ${
-                    n <= rating ? 'fill-amber-400 text-amber-400' : 'text-slate-300'
+                    n <= rating ? 'fill-amber-400 text-amber-400' : 'text-[#CED6E3]'
                   }`}
                 />
               </button>
@@ -139,41 +139,41 @@ export function CollectorReviewStep({
 
         <div className="grid gap-3 sm:grid-cols-3">
           <div>
-            <label className="mb-1 block text-xs font-bold text-slate-700">Your Name *</label>
+            <label className="mb-1 block text-xs font-bold text-[#131722]">Your name *</label>
             <input
               type="text"
               required
               value={authorName}
               onChange={(e) => onAuthorNameChange(e.target.value)}
               placeholder="Sam Patel"
-              className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:border-teal-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/40"
+              className="w-full rounded-xl border border-[#CED6E3] px-3 py-2 text-sm focus:border-[#2142E7] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2142E7]/30"
             />
           </div>
           <div>
-            <label className="mb-1 block text-xs font-bold text-slate-700">Role</label>
+            <label className="mb-1 block text-xs font-bold text-[#131722]">Role</label>
             <input
               type="text"
               value={authorRole}
               onChange={(e) => onAuthorRoleChange(e.target.value)}
               placeholder="Founder"
-              className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:border-teal-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/40"
+              className="w-full rounded-xl border border-[#CED6E3] px-3 py-2 text-sm focus:border-[#2142E7] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2142E7]/30"
             />
           </div>
           <div>
-            <label className="mb-1 block text-xs font-bold text-slate-700">Company</label>
+            <label className="mb-1 block text-xs font-bold text-[#131722]">Company</label>
             <input
               type="text"
               value={authorCompany}
               onChange={(e) => onAuthorCompanyChange(e.target.value)}
               placeholder="Northstar Co"
-              className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:border-teal-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/40"
+              className="w-full rounded-xl border border-[#CED6E3] px-3 py-2 text-sm focus:border-[#2142E7] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2142E7]/30"
             />
           </div>
         </div>
       </div>
 
       {error && (
-        <div className="mt-3 rounded-xl bg-rose-50 px-3.5 py-2.5 text-xs font-medium text-rose-700">
+        <div role="alert" className="mt-3 rounded-xl bg-[#FEF2F2] px-3.5 py-2.5 text-xs font-medium text-[#B91C1C]">
           {error}
         </div>
       )}
@@ -181,10 +181,10 @@ export function CollectorReviewStep({
       <button
         type="submit"
         disabled={submitting}
-        className="mt-6 flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl bg-emerald-600 py-3.5 text-sm font-bold text-white shadow-md transition hover:bg-emerald-700 disabled:opacity-60"
+        className="mt-6 flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-[#2142E7] py-3.5 text-sm font-bold text-white transition hover:bg-[#1935C7] disabled:opacity-60"
       >
         <CheckCircle2 className="h-4.5 w-4.5" />
-        <span>{submitting ? 'Publishing…' : 'Approve & Publish in One Tap'}</span>
+        <span>{submitting ? 'Publishing…' : 'Approve and publish review'}</span>
       </button>
     </form>
   );

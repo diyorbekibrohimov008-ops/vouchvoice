@@ -52,7 +52,7 @@ const sampleTestimonial: Testimonial = {
   approvedAt: '2026-11-11T00:00:00Z',
 };
 
-describe('Embed widget & Lifetime HTML export', () => {
+describe('Embed widget & standalone HTML export', () => {
   it('serves /embed.js with CORS and Shadow DOM widget loader', async () => {
     const res = await embedFn(new Request('https://vouchvoice-app.netlify.app/embed.js'));
     expect(res.status).toBe(200);
@@ -63,7 +63,7 @@ describe('Embed widget & Lifetime HTML export', () => {
     expect(js).toContain('data-vouch-wall');
   });
 
-  it('escapes HTML safely in standalone Lifetime HTML export', () => {
+  it('escapes HTML safely in standalone HTML export', () => {
     const html = buildStandaloneLifetimeHtml(
       sampleSpace,
       [sampleTestimonial],
